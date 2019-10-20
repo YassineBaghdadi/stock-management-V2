@@ -17,8 +17,6 @@ today = date.today()
 print("Today's date:", today)
 
 
-
-
 first_open_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "first_open_win.ui"))
 home_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "home.ui"))
 splash_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "splash.ui"))
