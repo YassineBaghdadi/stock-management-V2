@@ -25,6 +25,7 @@ virification_alert_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "vir
 history_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "history.ui"))
 add_new_pea_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "add_new_pea.ui"))
 delete_pea_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "delet_pea.ui"))
+fix_kridi_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "fix_kridi.ui"))
 #TODO : # help_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "help.ui"))
 
 
@@ -362,6 +363,31 @@ class Remove_client(QWidget, delete_pea_win_dir): #TODO DONE
 
 
 
+class C_kridi_fix(QWidget, fix_kridi_win_dir):
+    def __init__(self, parent = None):
+        super(C_kridi_fix, self).__init__(parent)
+        QWidget.__init__(self)
+        self.setupUi(self)
+        self.fill_comboB()
+
+    def fill_comboB(self):
+        self.fix_kridi_combo.clear()
+        curs.execute('SELECT name FROM C_kridi')
+        names = []
+        for i in curs.fetchall():
+            names.append(i[0])
+        self.fix_kridi_combo.addItems(names)
+
+
+
+# TODO 
+# class C_kridi_history(QWidget, history_win_dir):
+#     def __init__(self, parent = None):
+#         super(C_kridi_history, self).__init__(parent)
+#         QWidget.__init__(self)
+#         self.setupUi(self)
+
+
 class Home(QWidget, home_win_dir):#TODO almost...
     def __init__(self, parent = None):
         super(Home, self).__init__(parent)
@@ -394,7 +420,13 @@ class Home(QWidget, home_win_dir):#TODO almost...
         self.buy_and_buy_history_Button.clicked.connect(self.open_buy_history)
         self.exit_Button.clicked.connect(self.exit)
         self.remove_client_Button.clicked.connect(self.delete_client)
+        self.take_kridi_btn.clicked.connect(self.fix_C_kridi)
 
+
+    def fix_C_kridi(self):
+        self.close()
+        self.fix_C_K = C_kridi_fix()
+        self.fix_C_K.show()
 
 
     def delete_client(self):
@@ -501,55 +533,41 @@ class Home(QWidget, home_win_dir):#TODO almost...
         for i in curs.fetchall():
             self.hadit_list.append(i[0])
         self.hadit_label.setText(random.choice(self.hadit_list))
-        print(self.hadit_list)
-        curs.execute('SELECT total_rest FROM clients')
-        self.total_debt_C = []
-        for i in curs.fetchall():
-            if len(curs.fetchall()) == 0:
-                self.total_debt_C.append(0)
-                break
-            self.total_debt_C.append(i[0])
-            # print(i[0].type())
-            # self.total_money_debt.setText(float(self.total_money_debt.text()) + i[0])
-            print(i[0], '==> ', type(i[0]))
-        self.total_money_debt.setText(str(sum(map(float, self.total_debt_C))))
+        # print(self.hadit_list)
+        curs.execute('SELECT sum(total_rest) FROM C_kridi')
+        total_rest_C = curs.fetchone()[0]
+        
+        self.total_money_debt.setText(str(total_rest_C))
         self.total_money_debt.setText(self.total_money_debt.text() + ' DH ')
-        curs.execute('SELECT total_rest FROM sellers ')
-        self.total_debt_S = []
-        for i in curs.fetchall():
-            # if len(curs.fetchall()) == 0:
-            #     self.total_debt_S.append(0)
-            #     break
-            self.total_debt_S.append(i[0])
-            # print(i[0].type())
-            # self.total_money_debt.setText(float(self.total_money_debt.text()) + i[0])
-            print(i[0], '==> ', type(i[0]))
-        self.money_u_have_to_pay.setText(str(sum(map(float, self.total_debt_S))))
+        curs.execute('SELECT sum(total_rest) FROM S_kridi ')
+        total_debt_S = curs.fetchone()[0]
+        
+        self.money_u_have_to_pay.setText(str(total_debt_S))
         self.money_u_have_to_pay.setText(self.money_u_have_to_pay.text() + ' DH ')
-        print( 'set_total_sellers_dept_money', self.total_debt_S)
+        print( 'set_total_sellers_dept_money', total_debt_S)
+
         curs.execute('SELECT COUNT(ID) FROM clients WHERE total_rest > 0;')
         self.clients_debteds_counter.setText(str(curs.fetchone()[0]))
-        curs.execute('SELECT pay_date FROM clients')
+        curs.execute('SELECT COUNT(ID) FROM clients WHERE pay_date LIKE "{}"'.format(str(today)))
         # print(curs.fetchone()[0] == str(today))
-        self.clients_pay_today_list = []
-
-        for i in curs.fetchall():
-            if i[0] == str(today):
-                self.clients_pay_today_list.append(i[0])
-
-        self.clients_must_pay_counter_today.setText(str(len(self.clients_pay_today_list)))
+        clients_pay_today_list = curs.fetchone()[0]
+        
+        self.clients_must_pay_counter_today.setText(str(clients_pay_today_list))
 
 
 
     def refresh_tables(self):
         curs.execute('UPDATE clients SET total_rest = total_debted - total_recived')
         curs.execute('UPDATE sellers SET total_rest = total_debted - total_recived')
+        curs.execute('DELETE FROM C_kridi WHERE total_rest = 0')
+        curs.execute('DELETE FROM S_kridi WHERE total_rest = 0')
+        curs.execute('DELETE FROM articles WHERE qt = 0')
         conn.commit()
         #clients have to pay today table
         while self.clients_pay_today_table.rowCount() > 0 :
             self.clients_pay_today_table.removeRow(0)
 
-        curs.execute('SELECT  F_name,  L_name as f, total_rest FROM clients  WHERE pay_date LIKE "{}"'.format(str(today)))
+        curs.execute('SELECT  name , total_rest FROM C_kridi  WHERE pay_date LIKE "{}"'.format(str(today)))
         rus_ = curs.fetchall()
         self.clients_pay_today_table.setRowCount(0)
         for r_n, r_d in enumerate(rus_):
@@ -557,7 +575,22 @@ class Home(QWidget, home_win_dir):#TODO almost...
             for c_n, d in enumerate(r_d):
                 self.clients_pay_today_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
-        print(curs.fetchall())
+        print('rus_- = ', rus_)
+
+
+        #articles will end table
+        while self.articles_will_end.rowCount() > 0 :
+            self.articles_will_end.removeRow(0)
+
+        curs.execute('SELECT  name , qt FROM articles  WHERE qt < 10 ')
+        rus_ = curs.fetchall()
+        self.articles_will_end.setRowCount(0)
+        for r_n, r_d in enumerate(rus_):
+            self.articles_will_end.insertRow(r_n)
+            for c_n, d in enumerate(r_d):
+                self.articles_will_end.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
+
+
 
         #clients table
         while self.clients_table.rowCount() > 0 :
@@ -584,9 +617,30 @@ class Home(QWidget, home_win_dir):#TODO almost...
             self.articles_table.removeRow(0)
 
 
+        #clients table
+        while self.C_kridi_table.rowCount() > 0 :
+            self.C_kridi_table.removeRow(0)
+        curs.execute(
+            'SELECT name, cne, total_rest FROM C_kridi ORDER BY ID DESC;')
+        rus__ = curs.fetchall()
+        self.C_kridi_table.setRowCount(0)
+        for r_n, r_d in enumerate(rus__):
+            self.C_kridi_table.insertRow(r_n)
+            for c_n, d in enumerate(r_d):
+                self.C_kridi_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
 
-
+        #clients kridi
+        while self.S_kridi_table.rowCount() > 0 :
+            self.S_kridi_table.removeRow(0)
+        curs.execute(
+            'SELECT name, cne, total_rest FROM S_kridi ORDER BY ID DESC;')
+        rus__ = curs.fetchall()
+        self.S_kridi_table.setRowCount(0)
+        for r_n, r_d in enumerate(rus__):
+            self.S_kridi_table.insertRow(r_n)
+            for c_n, d in enumerate(r_d):
+                self.S_kridi_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
 
     def fill_combos(self):

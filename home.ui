@@ -1850,7 +1850,7 @@ QSint--ActionGroup QToolButton[class=&quot;action&quot;]:on {
     <enum>QTabWidget::Rounded</enum>
    </property>
    <property name="currentIndex">
-    <number>2</number>
+    <number>0</number>
    </property>
    <property name="elideMode">
     <enum>Qt::ElideNone</enum>
@@ -1880,8 +1880,8 @@ QSint--ActionGroup QToolButton[class=&quot;action&quot;]:on {
     <widget class="QLabel" name="wilcom_label">
      <property name="geometry">
       <rect>
-       <x>439</x>
-       <y>20</y>
+       <x>440</x>
+       <y>-10</y>
        <width>340</width>
        <height>51</height>
       </rect>
@@ -1945,10 +1945,10 @@ QSint--ActionGroup QToolButton[class=&quot;action&quot;]:on {
     <widget class="QLabel" name="hadit_label">
      <property name="geometry">
       <rect>
-       <x>420</x>
-       <y>80</y>
-       <width>361</width>
-       <height>151</height>
+       <x>510</x>
+       <y>58</y>
+       <width>270</width>
+       <height>270</height>
       </rect>
      </property>
      <property name="font">
@@ -2007,14 +2007,14 @@ padding: 7px;</string>
       <rect>
        <x>22</x>
        <y>24</y>
-       <width>356</width>
-       <height>310</height>
+       <width>240</width>
+       <height>317</height>
       </rect>
      </property>
      <property name="font">
       <font>
        <family>Dimnah</family>
-       <pointsize>13</pointsize>
+       <pointsize>10</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
@@ -2031,9 +2031,9 @@ padding: 7px;</string>
      <widget class="QTableWidget" name="clients_pay_today_table">
       <property name="geometry">
        <rect>
-        <x>3</x>
+        <x>9</x>
         <y>38</y>
-        <width>351</width>
+        <width>220</width>
         <height>270</height>
        </rect>
       </property>
@@ -2074,7 +2074,7 @@ padding: 7px;</string>
        <bool>true</bool>
       </property>
       <attribute name="horizontalHeaderVisible">
-       <bool>false</bool>
+       <bool>true</bool>
       </attribute>
       <attribute name="horizontalHeaderCascadingSectionResizes">
        <bool>true</bool>
@@ -2091,17 +2091,6 @@ padding: 7px;</string>
       <column>
        <property name="text">
         <string>الإسم</string>
-       </property>
-       <property name="font">
-        <font>
-         <family>AlHor</family>
-         <pointsize>9</pointsize>
-        </font>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>اللقب</string>
        </property>
        <property name="font">
         <font>
@@ -2135,6 +2124,116 @@ padding: 7px;</string>
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="geometry">
+      <rect>
+       <x>267</x>
+       <y>25</y>
+       <width>240</width>
+       <height>317</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Dimnah</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="contextMenuPolicy">
+      <enum>Qt::DefaultContextMenu</enum>
+     </property>
+     <property name="title">
+      <string>بضاعة شارفت على الإنتهاء</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <widget class="QTableWidget" name="articles_will_end">
+      <property name="geometry">
+       <rect>
+        <x>9</x>
+        <y>38</y>
+        <width>220</width>
+        <height>270</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+        <stylestrategy>PreferDefault</stylestrategy>
+       </font>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustIgnored</enum>
+      </property>
+      <property name="autoScrollMargin">
+       <number>5</number>
+      </property>
+      <property name="showDropIndicator" stdset="0">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="textElideMode">
+       <enum>Qt::ElideMiddle</enum>
+      </property>
+      <property name="showGrid">
+       <bool>true</bool>
+      </property>
+      <property name="gridStyle">
+       <enum>Qt::DashDotDotLine</enum>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+      <attribute name="horizontalHeaderVisible">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="horizontalHeaderCascadingSectionResizes">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="horizontalHeaderHighlightSections">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="horizontalHeaderMinimumSectionSize">
+       <number>75</number>
+      </attribute>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>البضاعة</string>
+       </property>
+       <property name="font">
+        <font>
+         <family>AlHor</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>الكمية</string>
+       </property>
+       <property name="font">
+        <font>
+         <family>AlHor</family>
+         <pointsize>9</pointsize>
+        </font>
+       </property>
+      </column>
+     </widget>
     </widget>
    </widget>
    <widget class="QWidget" name="moamalat_tab">
@@ -2841,7 +2940,7 @@ padding: 7px;</string>
    </widget>
    <widget class="QWidget" name="tab">
     <attribute name="title">
-     <string>استخلاص</string>
+     <string>قروض</string>
     </attribute>
     <widget class="QGroupBox" name="groupBox_2">
      <property name="geometry">
@@ -2855,7 +2954,7 @@ padding: 7px;</string>
      <property name="title">
       <string>GroupBox</string>
      </property>
-     <widget class="QTableWidget" name="tableWidget">
+     <widget class="QTableWidget" name="C_kridi_table">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -2864,18 +2963,70 @@ padding: 7px;</string>
         <height>241</height>
        </rect>
       </property>
+      <column>
+       <property name="text">
+        <string>الإسم</string>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans</family>
+         <weight>75</weight>
+         <italic>true</italic>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>البطاقة الوطنية</string>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans Condensed</family>
+         <weight>75</weight>
+         <italic>true</italic>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>المبلغ</string>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans Condensed</family>
+         <weight>75</weight>
+         <italic>true</italic>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
      </widget>
-     <widget class="QPushButton" name="logOut_Button_2">
+     <widget class="QPushButton" name="take_kridi_btn">
       <property name="geometry">
        <rect>
-        <x>150</x>
+        <x>200</x>
         <y>290</y>
-        <width>87</width>
+        <width>110</width>
         <height>35</height>
        </rect>
       </property>
       <property name="text">
-       <string>خروج</string>
+       <string>استخلاص</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="C_kridi_history_btn">
+      <property name="geometry">
+       <rect>
+        <x>80</x>
+        <y>290</y>
+        <width>110</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>التفاصيل</string>
       </property>
      </widget>
     </widget>
@@ -2891,27 +3042,79 @@ padding: 7px;</string>
      <property name="title">
       <string>GroupBox</string>
      </property>
-     <widget class="QTableWidget" name="tableWidget_2">
+     <widget class="QPushButton" name="pay_kridi_btn">
       <property name="geometry">
        <rect>
-        <x>9</x>
-        <y>39</y>
-        <width>351</width>
-        <height>241</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="logOut_Button_3">
-      <property name="geometry">
-       <rect>
-        <x>149</x>
+        <x>190</x>
         <y>289</y>
-        <width>87</width>
+        <width>110</width>
         <height>35</height>
        </rect>
       </property>
       <property name="text">
-       <string>خروج</string>
+       <string>دفع</string>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="S_kridi_table">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>37</y>
+        <width>351</width>
+        <height>241</height>
+       </rect>
+      </property>
+      <column>
+       <property name="text">
+        <string>الإسم</string>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans</family>
+         <weight>75</weight>
+         <italic>true</italic>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>البطاقة الوطنية</string>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans Condensed</family>
+         <weight>75</weight>
+         <italic>true</italic>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>المبلغ</string>
+       </property>
+       <property name="font">
+        <font>
+         <family>DejaVu Sans Condensed</family>
+         <weight>75</weight>
+         <italic>true</italic>
+         <bold>true</bold>
+        </font>
+       </property>
+      </column>
+     </widget>
+     <widget class="QPushButton" name="C_kridi_history_btn_2">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>290</y>
+        <width>110</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>التفاصيل</string>
       </property>
      </widget>
     </widget>
