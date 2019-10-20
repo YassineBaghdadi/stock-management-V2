@@ -362,7 +362,7 @@ class Remove_client(QWidget, delete_pea_win_dir): #TODO DONE
 
 
 
-
+#TODO HERE WE ARE 
 class C_kridi_fix(QWidget, fix_kridi_win_dir):
     def __init__(self, parent = None):
         super(C_kridi_fix, self).__init__(parent)
