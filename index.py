@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -369,16 +369,81 @@ class C_kridi_fix(QWidget, fix_kridi_win_dir):
         QWidget.__init__(self)
         self.setupUi(self)
         self.fill_comboB()
+        self.fix_kridi_done.clicked.connect(self.done)
+        self.fix_kridi_save.clicked.connect(self.save_)
+        self.fix_kridi_editeLine.textChanged.connect(self.check_state)
+        self.fix_kridi_save.setEnabled(False)
+        self.fix_kridi_editeLine.setEnabled(False)
+        self.fix_kridi_editeLine.setValidator(QtGui.QIntValidator(1, 2147483647, self))
+        self.fix_kridi_combo.currentTextChanged.connect(self.on_combo_changed)
+
+
+    def on_combo_changed(self):
+        if self.fix_kridi_combo.currentText() != '':
+            self.fix_kridi_editeLine.setEnabled(True)
+            
+
+    def check_state(self):
+        color = '#b6b6b6'#normal
+        curs.execute('SELECT total_rest FROM C_kridi WHERE name LIKE "{}"'.format(self.fix_kridi_combo.currentText()))
+        rest = curs.fetchone()[0]
+        if  self.fix_kridi_editeLine.text() == '':
+            color = '#b6b6b6'#normal
+            self.fix_kridi_save.setEnabled(False)
+            
+        elif float(self.fix_kridi_editeLine.text()) > rest :
+            color = '#f6989d'#red
+            self.fix_kridi_save.setEnabled(False)
+
+        
+        else:
+            self.fix_kridi_save.setEnabled(True)
+
+        self.fix_kridi_editeLine.setStyleSheet('QLineEdit { background-color: %s }' % color)
 
     def fill_comboB(self):
         self.fix_kridi_combo.clear()
         curs.execute('SELECT name FROM C_kridi')
-        names = []
+        names = ['']
         for i in curs.fetchall():
             names.append(i[0])
         self.fix_kridi_combo.addItems(names)
 
+    def done(self):
+        self.close()
+        self.home = Home()
+        self.home.show()
 
+    def save_(self):
+        if self.fix_kridi_combo.currentText() != '' and self.fix_kridi_editeLine.text() != '':
+            tt = 0
+            for i in self.fix_kridi_editeLine.text():
+                tt += int(i)
+            if tt != 0:
+                cll = self.fix_kridi_combo.currentText()
+                print('all input are full ######', cll)
+                print('all inputs are full right now')
+                curs.execute('UPDATE C_kridi SET total_recived = total_recived + {} WHERE name LIKE "{}"'
+                .format(self.fix_kridi_editeLine.text(), self.fix_kridi_combo.currentText()))
+                curs.execute('UPDATE clients SET total_recived = total_recived + {} WHERE F_name LIKE "{}" AND L_name LIKE "{}"'
+                .format(self.fix_kridi_editeLine.text(), cll.split(' ')[0], cll.split(' ')[1]))
+                curs.execute('UPDATE C_kridi SET total_rest = debte - total_recived ')
+                curs.execute('UPDATE clients SET total_rest = total_debted - total_recived ')
+                curs.execute('SELECT total_rest FROM C_kridi WHERE name LIKE "{}"'.format(self.fix_kridi_combo.currentText()))
+                curs.execute('INSERT INTO fix_C_kridi_history (date, name, payed_money, rest) VALUES ("{}", "{}", {}, {})'
+                .format(str(today), self.fix_kridi_combo.currentText(), self.fix_kridi_editeLine.text(), curs.fetchone()[0]))
+
+
+                conn.commit()
+            else:
+            #TODO do some ERROR
+                
+                print('its fucking zero')
+
+        else:
+            #TODO do some ERROR 
+            print('all input are Empty')
+            
 
 # TODO 
 # class C_kridi_history(QWidget, history_win_dir):
