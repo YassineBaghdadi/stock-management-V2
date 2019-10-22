@@ -3104,7 +3104,7 @@ padding: 7px;</string>
        </property>
       </column>
      </widget>
-     <widget class="QPushButton" name="C_kridi_history_btn_2">
+     <widget class="QPushButton" name="S_kridi_history_btn">
       <property name="geometry">
        <rect>
         <x>70</x>
@@ -3170,19 +3170,6 @@ padding: 7px;</string>
        <width>260</width>
        <height>29</height>
       </rect>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="searsh_client_Button">
-     <property name="geometry">
-      <rect>
-       <x>286</x>
-       <y>10</y>
-       <width>96</width>
-       <height>29</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>بحث</string>
      </property>
     </widget>
     <widget class="QTableWidget" name="clients_table">
@@ -3289,7 +3276,7 @@ padding: 7px;</string>
       </property>
      </column>
     </widget>
-    <widget class="QPushButton" name="searsh_client_Button_4">
+    <widget class="QPushButton" name="print_clients_table">
      <property name="geometry">
       <rect>
        <x>390</x>

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>306</width>
-    <height>289</height>
+    <height>350</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -19,7 +19,7 @@
   <property name="maximumSize">
    <size>
     <width>306</width>
-    <height>289</height>
+    <height>350</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -1822,35 +1822,25 @@ QSint--ActionGroup QToolButton[class=&quot;action&quot;]:on {
     color: red;
 }</string>
   </property>
-  <widget class="QLineEdit" name="lineEdit">
+  <widget class="QLineEdit" name="cne">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>33</x>
-     <y>161</y>
-     <width>160</width>
+     <x>20</x>
+     <y>140</y>
+     <width>181</width>
      <height>29</height>
     </rect>
    </property>
   </widget>
-  <widget class="QComboBox" name="comboBox_2">
+  <widget class="QComboBox" name="cliients_names_combo">
    <property name="geometry">
     <rect>
-     <x>32</x>
-     <y>82</y>
-     <width>161</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="layoutDirection">
-    <enum>Qt::RightToLeft</enum>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="comboBox">
-   <property name="geometry">
-    <rect>
-     <x>32</x>
-     <y>40</y>
-     <width>161</width>
+     <x>25</x>
+     <y>20</y>
+     <width>260</width>
      <height>25</height>
     </rect>
    </property>
@@ -1862,7 +1852,7 @@ QSint--ActionGroup QToolButton[class=&quot;action&quot;]:on {
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>38</y>
+     <y>60</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -1870,121 +1860,163 @@ QSint--ActionGroup QToolButton[class=&quot;action&quot;]:on {
    <property name="font">
     <font>
      <family>Arab</family>
-     <pointsize>13</pointsize>
+     <pointsize>9</pointsize>
      <weight>75</weight>
      <bold>true</bold>
     </font>
    </property>
    <property name="text">
-    <string>الإسم            :</string>
+    <string>الإسم الأول :</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>80</y>
-     <width>101</width>
+     <x>204</x>
+     <y>140</y>
+     <width>80</width>
      <height>31</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Arab</family>
-     <pointsize>13</pointsize>
+     <pointsize>9</pointsize>
      <weight>75</weight>
      <bold>true</bold>
     </font>
    </property>
    <property name="text">
-    <string>البطاقة الوطنية :</string>
+    <string>البطاقة  :      </string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>190</x>
-     <y>120</y>
-     <width>101</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arab</family>
-     <pointsize>13</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>مجال التعديل  :</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="comboBox_3">
+  <widget class="QPushButton" name="done">
    <property name="geometry">
     <rect>
      <x>32</x>
-     <y>122</y>
-     <width>161</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="layoutDirection">
-    <enum>Qt::RightToLeft</enum>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_4">
-   <property name="geometry">
-    <rect>
-     <x>191</x>
-     <y>157</y>
-     <width>101</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arab</family>
-     <pointsize>13</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>القيمة الجديدة :</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_2">
-   <property name="geometry">
-    <rect>
-     <x>32</x>
-     <y>228</y>
+     <y>300</y>
      <width>110</width>
      <height>34</height>
     </rect>
    </property>
    <property name="text">
-    <string>إلغاء</string>
+    <string>تم</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_3">
+  <widget class="QPushButton" name="save_">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>159</x>
-     <y>229</y>
+     <y>301</y>
      <width>110</width>
      <height>34</height>
     </rect>
    </property>
    <property name="minimumSize">
     <size>
-     <width>110</width>
+     <width>32</width>
      <height>24</height>
     </size>
    </property>
    <property name="text">
     <string>حفظ</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="F_name">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>21</x>
+     <y>62</y>
+     <width>181</width>
+     <height>29</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="L_name">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>100</y>
+     <width>181</width>
+     <height>29</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>98</y>
+     <width>100</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arab</family>
+     <pointsize>9</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;الإسم الثاني&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>207</x>
+     <y>107</y>
+     <width>16</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>:</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>204</x>
+     <y>190</y>
+     <width>80</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arab</family>
+     <pointsize>9</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>ملاحظة  :      </string>
+   </property>
+  </widget>
+  <widget class="QTextEdit" name="note">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>182</y>
+     <width>180</width>
+     <height>100</height>
+    </rect>
    </property>
   </widget>
  </widget>

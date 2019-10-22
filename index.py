@@ -12,6 +12,8 @@ import time
 import sqlite3
 import random
 import multiprocessing as mp
+
+
 today = date.today()
 
 print("Today's date:", today)
@@ -28,6 +30,7 @@ delete_pea_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "delet_pea.u
 fix_kridi_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "fix_kridi.ui"))
 fix_kridi_history_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "fix_history.ui"))
 kridi_history_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "kridi_history.ui"))
+edite_pea_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "edit_pea.ui"))
 #TODO : # help_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "help.ui"))
 
 
@@ -327,26 +330,26 @@ class Remove_client(QWidget, delete_pea_win_dir): # DONE
     def set_cne(self):
         if self.shose_pea_to_rmv.currentText() != '':
             curs.execute('SELECT cne FROM clients WHERE F_name LIKE "{}" AND L_name LIKE "{}"'
-                         .format(self.shose_pea_to_rmv.currentText().split(' ')[0], self.shose_pea_to_rmv.currentText().split(' ')[1]))
+                         .format(self.shose_pea_to_rmv.currentText().split('|')[0], self.shose_pea_to_rmv.currentText().split('|')[1]))
             print(self.shose_pea_to_rmv.currentText())
-            print('selected F_name : {}'.format(self.shose_pea_to_rmv.currentText().split(' ')[0]))
-            print('selected L_name : {}'.format(self.shose_pea_to_rmv.currentText().split(' ')[1]))
+            print('selected F_name : {}'.format(self.shose_pea_to_rmv.currentText().split('|')[0]))
+            print('selected L_name : {}'.format(self.shose_pea_to_rmv.currentText().split('|')[1]))
             # print('selected client cne : {}'.format(curs.fetchone()[0]))
             self.show_cne_rmv_page.setText(curs.fetchone()[0])
     def fill_combo(self):
         clients_names_list_ = ['']
         curs.execute('SELECT F_name, L_name  FROM clients')
         for fn, ln in curs.fetchall():
-            clients_names_list_.append(fn + ' ' + ln)
+            clients_names_list_.append(fn + '|' + ln)
         print('CLIENTS : ', clients_names_list_)
         self.shose_pea_to_rmv.addItems(clients_names_list_)
 
     def delete(self):
-        print('selected F_name : {}'.format(self.shose_pea_to_rmv.currentText().split(' ')[0]))
-        print('selected L_name : {}'.format(self.shose_pea_to_rmv.currentText().split(' ')[1]))
+        print('selected F_name : {}'.format(self.shose_pea_to_rmv.currentText().split('|')[0]))
+        print('selected L_name : {}'.format(self.shose_pea_to_rmv.currentText().split('|')[1]))
         curs.execute('DELETE FROM clients WHERE F_name LIKE "{}" AND L_name LIKE "{}" AND cne LIKE "{}" '
-                     .format(self.shose_pea_to_rmv.currentText().split(' ')[0],
-                             self.shose_pea_to_rmv.currentText().split(' ')[1],
+                     .format(self.shose_pea_to_rmv.currentText().split('|')[0],
+                             self.shose_pea_to_rmv.currentText().split('|')[1],
                      self.show_cne_rmv_page.text()))
         self.shose_pea_to_rmv.clear()
         self.fill_combo()
@@ -418,7 +421,12 @@ class C_kridi_fix(QWidget, fix_kridi_win_dir):
     def on_combo_changed(self):
         if self.fix_kridi_combo.currentText() != '':
             self.fix_kridi_editeLine.setEnabled(True)
-            
+        else:
+            self.fix_kridi_editeLine.setEnabled(False)
+
+        self.fix_kridi_editeLine.setText('')
+        self.fix_kridi_editeLine.setFocus()
+        
 
     def check_state(self):
         color = '#b6b6b6'#normal
@@ -472,6 +480,119 @@ class C_kridi_fix(QWidget, fix_kridi_win_dir):
         except ERROR as er:
             print(er)
             
+
+class S_kridi_fix_history(QWidget, fix_kridi_history_win_dir):
+    def __init__(self, parent = None):
+        super(S_kridi_fix_history, self).__init__(parent)
+        QWidget.__init__(self)
+        self.setupUi(self)
+        self.refresh_()
+        self.back_btn.clicked.connect(self.back__)
+        self.print_btn.clicked.connect(self.print_)
+
+
+    def print_(self):##~ TODO ~~PRINT fucking DATA 
+        pass
+
+    def back__(self):
+        self.close()
+        self.fix = S_kridi_fix()
+        self.fix.show()
+
+    def refresh_(self):
+        while self.fix_table.rowCount() > 0 :
+            self.articles_fix_tablewill_end.removeRow(0)
+
+        curs.execute('SELECT  date, name , payed_money, rest FROM fix_S_kridi_history ORDER BY ID DESC')
+        rus_ = curs.fetchall()
+        self.fix_table.setRowCount(0)
+        for r_n, r_d in enumerate(rus_):
+            self.fix_table.insertRow(r_n)
+            for c_n, d in enumerate(r_d):
+                self.fix_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
+
+class S_kridi_fix(QWidget, fix_kridi_win_dir):
+    def __init__(self, parent = None):
+        super(S_kridi_fix, self).__init__(parent)
+        QWidget.__init__(self)
+        self.setupUi(self)
+        self.fill_comboB()
+        self.fix_kridi_done.clicked.connect(self.done)
+        self.fix_kridi_save.clicked.connect(self.save_)
+        self.fix_kridi_editeLine.textChanged.connect(self.check_state)
+        self.fix_kridi_save.setEnabled(False)
+        self.fix_kridi_editeLine.setEnabled(False)
+        self.fix_kridi_editeLine.setValidator(QtGui.QIntValidator(1, 2147483647, self))
+        self.fix_kridi_combo.currentTextChanged.connect(self.on_combo_changed)
+        self.fix_kridi_history_btn.clicked.connect(self.fix_S_kridi_history)
+
+    def fix_S_kridi_history(self):
+        self.close()
+        self.fixS_H = S_kridi_fix_history()
+        self.fixS_H.show()
+
+    def on_combo_changed(self):
+        if self.fix_kridi_combo.currentText() != '':
+            self.fix_kridi_editeLine.setEnabled(True)
+        else:
+            self.fix_kridi_editeLine.setEnabled(False)
+
+        self.fix_kridi_editeLine.setText('')
+        self.fix_kridi_editeLine.setFocus()
+        
+
+    def check_state(self):
+        color = '#b6b6b6'#normal
+        tt = 0
+        for i in self.fix_kridi_editeLine.text():
+            tt += int(i)
+        curs.execute('SELECT total_rest FROM S_kridi WHERE name LIKE "{}"'.format(self.fix_kridi_combo.currentText()))
+        rest = curs.fetchone()[0]
+        if  self.fix_kridi_editeLine.text() == '':
+            color = '#b6b6b6'#normal
+            self.fix_kridi_save.setEnabled(False)
+            self.rest_label.setText('')
+
+            
+        elif float(self.fix_kridi_editeLine.text()) > rest or tt == 0:
+            color = '#f6989d'#red
+            self.fix_kridi_save.setEnabled(False)
+            self.rest_label.setText('خطأ')
+
+        else:
+            self.fix_kridi_save.setEnabled(True)
+            self.rest_label.setText(str(rest - float(self.fix_kridi_editeLine.text())) + ' DH')
+        self.fix_kridi_editeLine.setStyleSheet('QLineEdit { background-color: %s }' % color)
+
+    def fill_comboB(self):
+        self.fix_kridi_combo.clear()
+        curs.execute('SELECT name FROM S_kridi')
+        names = ['']
+        for i in curs.fetchall():
+            names.append(i[0])
+        self.fix_kridi_combo.addItems(names)
+
+    def done(self):
+        self.close()
+        self.home = Home()
+        self.home.show()
+
+    def save_(self):
+        try:
+            cll = self.fix_kridi_combo.currentText()
+            curs.execute('UPDATE S_kridi SET total_recived = total_recived + {} WHERE name LIKE "{}"'
+                    .format(self.fix_kridi_editeLine.text(), self.fix_kridi_combo.currentText()))
+            curs.execute('UPDATE sellers SET total_recived = total_recived + {} WHERE F_name LIKE "{}" AND L_name LIKE "{}"'
+                    .format(self.fix_kridi_editeLine.text(), cll.split(' ')[0], cll.split(' ')[1]))
+            curs.execute('UPDATE S_kridi SET total_rest = debte - total_recived ')
+            curs.execute('UPDATE sellers SET total_rest = total_debted - total_recived ')
+            curs.execute('SELECT total_rest FROM S_kridi WHERE name LIKE "{}"'.format(self.fix_kridi_combo.currentText()))
+            curs.execute('INSERT INTO fix_S_kridi_history (date, name, payed_money, rest) VALUES ("{}", "{}", {}, {})'
+                    .format(str(today), self.fix_kridi_combo.currentText(), self.fix_kridi_editeLine.text(), curs.fetchone()[0]))
+            conn.commit()
+        except ERROR as er:
+            print(er)
+           
  
 class C_kridi_history(QWidget, kridi_history_win_dir):
     def __init__(self, parent = None):
@@ -503,9 +624,103 @@ class C_kridi_history(QWidget, kridi_history_win_dir):
         self.home = Home()
         self.home.show()
 
-#TOTDO here we  paused
 
 
+
+class S_kridi_history(QWidget, kridi_history_win_dir):
+    def __init__(self, parent = None):
+        super(S_kridi_history, self).__init__(parent)
+        QWidget.__init__(self)
+        self.setupUi(self)
+        self.back_from_history.clicked.connect(self.bback)
+        self.print_history.clicked.connect(self.pprint)
+        self.refresh()
+
+    def refresh(self):
+        while self.kridi_history_table.rowCount() > 0 :
+            self.kridi_history_table.removeRow(0)
+
+        curs.execute('SELECT date, name, article , qt, total, pay_date FROM S_kridi_history ORDER BY ID DESC')
+        rus_ = curs.fetchall()
+        self.kridi_history_table.setRowCount(0)
+        for r_n, r_d in enumerate(rus_):
+            self.kridi_history_table.insertRow(r_n)
+            for c_n, d in enumerate(r_d):
+                self.kridi_history_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
+
+
+    def pprint(self):#TODO PRINT data 
+        pass
+
+    def bback(self):
+        self.close()
+        self.home = Home()
+        self.home.show()
+
+class Edite_client(QWidget, edite_pea_win_dir):
+    def __init__(self, parent = None):
+        super(Edite_client, self).__init__(parent)
+        QWidget.__init__(self)
+        self.setupUi(self)
+        self.done.clicked.connect(self.DONE)
+        self.cliients_names_combo.currentTextChanged.connect(self.selected)
+        self.refresh()
+        self.save_.clicked.connect(self.save)
+
+
+    def save(self):
+        curs.execute('UPDATE clients SET F_name = "{}", L_name = "{}", cne = "{}", note = "{}" WHERE F_name LIKE "{}" AND L_name LIKE "{}"'
+        .format(self.F_name.text(), self.L_name.text(), self.cne.text(), self.note.toPlainText(), self.cliients_names_combo.currentText().split('|')[0], 
+        self.cliients_names_combo.currentText().split('|')[1]))
+        conn.commit()
+        self.cliients_names_combo.setCurrentIndex(0)
+        self.refresh()
+
+    def selected(self):
+        if self.cliients_names_combo.currentText() == '':
+            self.F_name.setEnabled(False)
+            self.L_name.setEnabled(False)
+            self.cne.setEnabled(False)
+            self.note.setEnabled(False)
+            self.save_.setEnabled(False)
+
+            self.F_name.setText('')
+            self.L_name.setText('')
+            self.cne.setText('')
+            self.note.setText('')
+        else:
+            curs.execute('SELECT F_name, L_name, cne, note FROM clients WHERE F_name LIKE "{}" AND L_name LIKE "{}"'
+                .format(self.cliients_names_combo.currentText().split('|')[0], self.cliients_names_combo.currentText().split('|')[1]))
+            info = curs.fetchone()
+            print(info)
+
+            self.F_name.setEnabled(True)
+            self.L_name.setEnabled(True)
+            self.cne.setEnabled(True)
+            self.note.setEnabled(True)
+            self.save_.setEnabled(True)
+
+            self.F_name.setText(info[0])
+            self.L_name.setText(info[1])
+            self.cne.setText(info[2])
+            self.note.setText(info[3])
+
+
+    def refresh(self):
+        self.cliients_names_combo.clear()
+        curs.execute('SELECT F_name, L_name FROM clients')
+        names =['']
+        for i in curs.fetchall():
+            names.append(i[0] + '|' + i[1])
+        
+        self.cliients_names_combo.addItems(names)
+
+
+
+    def DONE(self):
+        self.close()
+        self.home = Home()
+        self.home.show()
 
 
 class Home(QWidget, home_win_dir):# almost...
@@ -541,10 +756,61 @@ class Home(QWidget, home_win_dir):# almost...
         self.exit_Button.clicked.connect(self.exit)
         self.remove_client_Button.clicked.connect(self.delete_client)
         self.take_kridi_btn.clicked.connect(self.fix_C_kridi)
+        self.pay_kridi_btn.clicked.connect(self.fix_S_kridi)
         self.C_kridi_history_btn.clicked.connect(self.c_k_history)
+        self.S_kridi_history_btn.clicked.connect(self.s_k_history)
+        self.edit_client_Button.clicked.connect(self.edit_client)
+        # self.print_clients_table.clicked.connect(self.print_clients_info)
+        self.searsh_client_EditText.textChanged.connect(self.searsh)
+
+
+    def searsh(self):
+        # self.searsh_client_EditText.setText('*' + self.searsh_client_EditText.text() + '*')
+        if self.searsh_client_EditText.text() != '' or self.searsh_client_EditText.text() != ' ':
+            #clients table
+            while self.clients_table.rowCount() > 0 :
+                self.clients_table.removeRow(0)
+            curs.execute('''
+            SELECT F_name,  L_name, cne, total_debted, total_recived, total_rest, pay_date, note FROM clients 
+                WHERE F_name LIKE "{}" OR L_name LIKE "{}" OR cne LIKE "{}" OR total_debted = "{}" OR total_recived = "{}" OR pay_date LIKE "{}" OR note LIKE "{}"'''
+            .format('%' + self.searsh_client_EditText.text() + '%', '%' + self.searsh_client_EditText.text() + '%', '%' + self.searsh_client_EditText.text() + '%',
+            '%' + self.searsh_client_EditText.text() + '%', '%' + str(self.searsh_client_EditText.text()) + '%', '%' + str(self.searsh_client_EditText.text()) + '%', 
+            '%' + self.searsh_client_EditText.text() + '%'))
+            # print(curs.fetchall())
+            rus__ = curs.fetchall()
+            self.clients_table.setRowCount(0)
+            for r_n, r_d in enumerate(rus__):
+                self.clients_table.insertRow(r_n)
+                for c_n, d in enumerate(r_d):
+                    self.clients_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
+
+
+        else:
+
+            #clients table
+            while self.clients_table.rowCount() > 0 :
+                self.clients_table.removeRow(0)
+            curs.execute(
+                'SELECT  F_name,  L_name, cne, total_debted, total_recived, total_rest, pay_date, note FROM clients ORDER BY ID DESC;')
+            rus__ = curs.fetchall()
+            self.clients_table.setRowCount(0)
+            for r_n, r_d in enumerate(rus__):
+                self.clients_table.insertRow(r_n)
+                for c_n, d in enumerate(r_d):
+                    self.clients_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
+
+
+    #TODO PRINT 
+    # self print_clients_info(self):
+    #     pass
 
     def c_k_history(self):
         self.c_k_h = C_kridi_history()
+        self.c_k_h.show()
+        self.close()
+
+    def s_k_history(self):
+        self.c_k_h = S_kridi_history()
         self.c_k_h.show()
         self.close()
 
@@ -553,6 +819,11 @@ class Home(QWidget, home_win_dir):# almost...
         self.fix_C_K = C_kridi_fix()
         self.fix_C_K.show()
 
+
+    def fix_S_kridi(self):
+        self.close()
+        self.fix_S_K = S_kridi_fix()
+        self.fix_S_K.show()
 
     def delete_client(self):
         self.close()
@@ -742,7 +1013,6 @@ class Home(QWidget, home_win_dir):# almost...
             self.articles_table.removeRow(0)
 
 
-        #clients table
         while self.C_kridi_table.rowCount() > 0 :
             self.C_kridi_table.removeRow(0)
         curs.execute(
@@ -753,6 +1023,19 @@ class Home(QWidget, home_win_dir):# almost...
             self.C_kridi_table.insertRow(r_n)
             for c_n, d in enumerate(r_d):
                 self.C_kridi_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
+
+
+        while self.S_kridi_table.rowCount() > 0 :
+            self.S_kridi_table.removeRow(0)
+        curs.execute(
+            'SELECT name, cne, total_rest FROM S_kridi ORDER BY ID DESC;')
+        rus__ = curs.fetchall()
+        self.S_kridi_table.setRowCount(0)
+        for r_n, r_d in enumerate(rus__):
+            self.S_kridi_table.insertRow(r_n)
+            for c_n, d in enumerate(r_d):
+                self.S_kridi_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
+
 
 
         #clients kridi
@@ -1212,7 +1495,9 @@ class Home(QWidget, home_win_dir):# almost...
         pass
 
     def edit_client(self):
-        pass
+        self.close()
+        self.edite = Edite_client()
+        self.edite.show()
 
     def search_client(self):
         pass
