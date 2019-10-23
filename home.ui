@@ -3165,7 +3165,7 @@ padding: 7px;</string>
     <widget class="QLineEdit" name="searsh_client_EditText">
      <property name="geometry">
       <rect>
-       <x>16</x>
+       <x>80</x>
        <y>10</y>
        <width>260</width>
        <height>29</height>
@@ -3307,19 +3307,6 @@ padding: 7px;</string>
       <string>إضافة</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="searsh_seller_Button">
-     <property name="geometry">
-      <rect>
-       <x>289</x>
-       <y>8</y>
-       <width>90</width>
-       <height>29</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>بحث</string>
-     </property>
-    </widget>
     <widget class="QTableWidget" name="sellers_table">
      <property name="geometry">
       <rect>
@@ -3437,7 +3424,7 @@ padding: 7px;</string>
     <widget class="QLineEdit" name="searsh_seller_EditText">
      <property name="geometry">
       <rect>
-       <x>19</x>
+       <x>80</x>
        <y>8</y>
        <width>260</width>
        <height>29</height>
@@ -3475,10 +3462,10 @@ padding: 7px;</string>
     <attribute name="title">
      <string>السلع</string>
     </attribute>
-    <widget class="QLineEdit" name="searsh_article_EditText">
+    <widget class="QLineEdit" name="searsh_art">
      <property name="geometry">
       <rect>
-       <x>16</x>
+       <x>80</x>
        <y>1</y>
        <width>260</width>
        <height>30</height>
@@ -3553,11 +3540,14 @@ padding: 7px;</string>
       </property>
      </column>
     </widget>
-    <widget class="QPushButton" name="remove_article_Button">
+    <widget class="QPushButton" name="remove_art_Button">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
-       <x>594</x>
-       <y>1</y>
+       <x>521</x>
+       <y>2</y>
        <width>90</width>
        <height>30</height>
       </rect>
@@ -3566,24 +3556,11 @@ padding: 7px;</string>
       <string>حذف</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="searsh_article_Button">
+    <widget class="QPushButton" name="edit_art_Button">
      <property name="geometry">
       <rect>
-       <x>286</x>
-       <y>1</y>
-       <width>90</width>
-       <height>30</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>بحث</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="edit_article_Button">
-     <property name="geometry">
-      <rect>
-       <x>680</x>
-       <y>1</y>
+       <x>607</x>
+       <y>2</y>
        <width>90</width>
        <height>30</height>
       </rect>
@@ -3592,17 +3569,30 @@ padding: 7px;</string>
       <string>تعديل</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="remove_article_Button_4">
+    <widget class="QPushButton" name="print_art">
      <property name="geometry">
       <rect>
-       <x>507</x>
-       <y>1</y>
+       <x>434</x>
+       <y>2</y>
        <width>90</width>
        <height>30</height>
       </rect>
      </property>
      <property name="text">
       <string>طباعة</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="add_art_Button">
+     <property name="geometry">
+      <rect>
+       <x>695</x>
+       <y>2</y>
+       <width>87</width>
+       <height>29</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>إضافة</string>
      </property>
     </widget>
    </widget>

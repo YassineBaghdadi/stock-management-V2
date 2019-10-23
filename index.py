@@ -14,6 +14,7 @@ import random
 import multiprocessing as mp
 
 
+
 today = date.today()
 
 print("Today's date:", today)
@@ -26,11 +27,13 @@ virification_alert_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "vir
 #TODO : # setting_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "setting.ui"))
 history_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "history.ui"))
 add_new_pea_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "add_new_pea.ui"))
+add_new_art_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "add_new_art.ui"))
 delete_pea_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "delet_pea.ui"))
 fix_kridi_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "fix_kridi.ui"))
 fix_kridi_history_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "fix_history.ui"))
 kridi_history_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "kridi_history.ui"))
 edite_pea_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "edit_pea.ui"))
+edite_art_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "edit_art.ui"))
 #TODO : # help_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "help.ui"))
 
 
@@ -99,6 +102,10 @@ class Splash(QWidget, splash_win_dir):#TODO :DONE
             return
         self.step += 4
         self.progressBar.setValue(self.step)
+
+
+
+
 #///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class FirstOpen(QMainWindow, first_open_win_dir):# almost done
     def __init__(self, parent = None):
@@ -315,6 +322,169 @@ class ADD_new_client(QWidget, add_new_pea_win_dir):# DONE
         self.home_wn.show()
 
 
+
+class ADD_new_seller(QWidget, add_new_pea_win_dir):# DONE
+    def __init__(self, parent = None):
+        super(ADD_new_seller, self).__init__(parent)
+        QWidget.__init__(self)
+        self.setupUi(self)
+        self.cancel_btn.clicked.connect(self.cancel)
+        self.save_new_client.clicked.connect(self.save_new_client_)
+
+        self.sellers_full_names = []
+    def save_new_client_(self):
+        if self.F_name.text() == '' or self.F_name.text() == ' ':
+            self.err = QtWidgets.QErrorMessage()
+            self.err.showMessage('المرجو إدخال الإسم الأول ')
+            self.err.setWindowTitle('خطأ')
+            self.F_name.setFocus()
+
+        elif self.L_name.text() == '' or self.L_name.text() == ' ':
+            self.err = QtWidgets.QErrorMessage()
+            self.err.showMessage('المرجو إدخال الإسم الأخير ')
+            self.err.setWindowTitle('خطأ')
+            self.L_name.setFocus()
+
+        else:
+            self.sellers_cne_list = []
+            curs.execute('SELECT cne FROM sellers')
+            for cne in curs.fetchall():
+                # print('#####################\n', cne[0], '##', '\n#######################')
+                self.sellers_cne_list.append(cne[0])
+
+            curs.execute('SELECT F_name, L_name FROM sellers')
+            for fname, lname in curs.fetchall():
+                self.sellers_full_names.append(fname + ' ' + lname)
+
+            print('sellers full names list \n******************************************\n{}\n***************************'.format(self.sellers_full_names))
+            if self.F_name.text() + ' ' + self.L_name.text() in self.sellers_full_names:
+                current_info = curs.execute('SELECT F_name, L_name, cne FROM sellers'
+                                            ' WHERE F_name LIKE "{}" AND L_name LIKE "{}";'.format(self.F_name.text(),
+                                                                                                   self.L_name.text()))
+                self.current = []
+                for oo in current_info.fetchall():
+                    print('00 = {}'.format(oo))
+                    self.current.append(oo[0])
+                    self.current.append(oo[1])
+                    self.current.append(oo[2])
+                print('##########', self.current)
+                self.err = QtWidgets.QErrorMessage()
+                self.err.showMessage(
+                    ' هذا الزبون موجود بالفعل في قاعدة البيانات \n #الإسم : " ‏؜{} "  #اللقب : " {} "  #البطاقة الوطنية : " {} " '
+                    .format(str(self.current[0]), str(self.current[1]), str(self.current[2])))
+                self.err.setWindowTitle('هذا الزبون موجود في قاعدة البيانات')
+                self.F_name.setFocus()
+
+            elif self.cne.text() in self.sellers_cne_list:
+                bb = curs.execute('SELECT F_name, L_name FROM sellers WHERE cne LIKE "{}"'.format(self.cne.text()))
+                liss = bb.fetchone()
+                msg = 'هذه البطاقة الوطنية هي للسيد : {} {}'
+                self.err = QtWidgets.QErrorMessage()
+                self.err.setWindowTitle('هناك تداخل في البيانات')
+                self.err.showMessage(msg.format(liss[0], liss[1]))
+
+            else:
+                if self.cne.text() == '' or self.cne.text() == ' ':
+                    self.cne.setText('-')
+
+                if self.note.text() == '' or self.note.text() == ' ':
+                    self.note.setText('-')
+                #
+                curs.execute('INSERT INTO sellers (F_name, L_name, cne, note) VALUES("{}", "{}", "{}", "{}");'
+                             .format(self.F_name.text(), self.L_name.text(), self.cne.text(), self.note.text()))
+
+                conn.commit()
+                self.F_name.setText('')
+                self.F_name.setFocus()
+                self.L_name.setText('')
+                self.cne.setText('')
+                self.note.setText('')
+                # self.cancel()
+
+    def cancel(self):
+        self.close()
+        self.home_wn = Home()
+        self.home_wn.show()
+
+
+
+class ADD_new_art(QWidget, add_new_art_win_dir):# DONE
+    def __init__(self, parent = None):
+        super(ADD_new_art, self).__init__(parent)
+        QWidget.__init__(self)
+        self.setupUi(self)
+        self.cancel_btn.clicked.connect(self.cancel)
+        self.save_new_art.clicked.connect(self.save_new_art_)
+
+        
+        self.art_list = []
+    def save_new_art_(self):
+        if self.name.text() == '' or self.name.text() == ' ':
+            self.err = QtWidgets.QErrorMessage()
+            self.err.showMessage('المرجو إدخال الإسم  ')
+            self.err.setWindowTitle('خطأ')
+            self.name.setFocus()
+
+        elif self.qt.text() == '' or self.qt.text() == ' ':
+            self.err = QtWidgets.QErrorMessage()
+            self.err.showMessage('المرجو إدخال الكمية ')
+            self.err.setWindowTitle('خطأ')
+            self.qt.setFocus()
+
+        elif self.price.text() == '' or self.price.text() == ' ':
+            self.err = QtWidgets.QErrorMessage()
+            self.err.showMessage('المرجو إدخال الثمن ')
+            self.err.setWindowTitle('خطأ')
+            self.price.setFocus()
+
+
+        else:
+            self.current = []
+            curs.execute('SELECT name FROM articles')
+            for nn in curs.fetchall():
+                self.art_list.append(nn[0])
+
+            if self.name.text() in self.art_list:
+                curs.execute('SELECT name, qt, price FROM articles WHERE name LIKE "{}" '.format(self.name.text()))
+                
+                for oo in curs.fetchone():
+                    self.current.append(oo)#name
+                    
+                print(self.current)
+                
+                self.err = QtWidgets.QErrorMessage()
+                self.err.showMessage('" {} " هي موجودة بالفعل في قاعدة البيانات و كميتها الحالية : "{}" و ثمنها : {} درهم'
+                    .format(self.current[0], self.current[1], self.current[2]))
+                self.err.setWindowTitle('هذه السلعة موجود في قاعدة البيانات')
+                self.name.setFocus()
+                
+            else:
+                if self.note.text() == '' or self.note.text() == ' ':
+                    self.note.setText('-')
+                if self.type.text() == '' or self.type.text() == ' ':
+                    self.type.setText('-')
+
+                curs.execute('INSERT INTO articles (name, type, qt, price, note) VALUES("{}", "{}", {}, {}, "{}");'
+                             .format(self.name.text(), self.type.text(), self.qt.text(), self.price.text(), self.note.text()))
+
+                conn.commit()
+                self.name.setText('')
+                self.name.setFocus()
+                self.type.setText('')
+                self.qt.setText('')
+                self.price.setText('')
+                self.note.setText('')
+                # self.cancel()
+
+    def cancel(self):
+        self.close()
+        self.home_wn = Home()
+        self.home_wn.show()
+
+
+
+
+
 class Remove_client(QWidget, delete_pea_win_dir): # DONE
     def __init__(self, parent = None):
         super(Remove_client, self).__init__(parent)
@@ -364,6 +534,58 @@ class Remove_client(QWidget, delete_pea_win_dir): # DONE
         self.close()
         self.home = Home()
         self.home.show()
+
+
+
+class Remove_seller(QWidget, delete_pea_win_dir): # DONE
+    def __init__(self, parent = None):
+        super(Remove_seller, self).__init__(parent)
+        QWidget.__init__(self)
+        self.setupUi(self)
+        self.fill_combo()
+        self.shose_pea_to_rmv.currentTextChanged.connect(self.set_cne)
+        self.rmv_btn.clicked.connect(self.delete_)
+        self.cancel_rmv.clicked.connect(self.cncl)
+
+
+
+    def set_cne(self):
+        if self.shose_pea_to_rmv.currentText() != '':
+            curs.execute('SELECT cne FROM sellers WHERE F_name LIKE "{}" AND L_name LIKE "{}"'
+                         .format(self.shose_pea_to_rmv.currentText().split('|')[0], self.shose_pea_to_rmv.currentText().split('|')[1]))
+
+            self.show_cne_rmv_page.setText(curs.fetchone()[0])
+    def fill_combo(self):
+        clients_names_list_ = ['']
+        curs.execute('SELECT F_name, L_name  FROM sellers')
+        for fn, ln in curs.fetchall():
+            clients_names_list_.append(fn + '|' + ln)
+        print('CLIENTS : ', clients_names_list_)
+        self.shose_pea_to_rmv.addItems(clients_names_list_)
+
+    def delete_(self):
+        print('selected F_name : {}'.format(self.shose_pea_to_rmv.currentText().split('|')[0]))
+        print('selected L_name : {}'.format(self.shose_pea_to_rmv.currentText().split('|')[1]))
+        curs.execute('DELETE FROM sellers WHERE F_name LIKE "{}" AND L_name LIKE "{}" AND cne LIKE "{}" '
+                     .format(self.shose_pea_to_rmv.currentText().split('|')[0],
+                             self.shose_pea_to_rmv.currentText().split('|')[1],
+                     self.show_cne_rmv_page.text()))
+        self.shose_pea_to_rmv.clear()
+        self.fill_combo()
+        self.shose_pea_to_rmv.setCurrentIndex(0)
+        self.show_cne_rmv_page.setText('')
+        conn.commit()
+
+
+
+
+    def cncl(self):
+        self.close()
+        self.home = Home()
+        self.home.show()
+
+
+
 
 class C_kridi_fix_history(QWidget, fix_kridi_history_win_dir):
     def __init__(self, parent = None):
@@ -723,6 +945,145 @@ class Edite_client(QWidget, edite_pea_win_dir):
         self.home.show()
 
 
+class Edite_seller(QWidget, edite_pea_win_dir):
+    def __init__(self, parent = None):
+        super(Edite_seller, self).__init__(parent)
+        QWidget.__init__(self)
+        self.setupUi(self)
+        self.done.clicked.connect(self.DONE)
+        self.cliients_names_combo.currentTextChanged.connect(self.selected)
+        self.refresh()
+        self.save_.clicked.connect(self.save)
+
+
+    def save(self):
+        curs.execute('UPDATE sellers SET F_name = "{}", L_name = "{}", cne = "{}", note = "{}" WHERE F_name LIKE "{}" AND L_name LIKE "{}"'
+        .format(self.F_name.text(), self.L_name.text(), self.cne.text(), self.note.toPlainText(), self.cliients_names_combo.currentText().split('|')[0], 
+        self.cliients_names_combo.currentText().split('|')[1]))
+        conn.commit()
+        self.cliients_names_combo.setCurrentIndex(0)
+        self.refresh()
+
+    def selected(self):
+        if self.cliients_names_combo.currentText() == '':
+            self.F_name.setEnabled(False)
+            self.L_name.setEnabled(False)
+            self.cne.setEnabled(False)
+            self.note.setEnabled(False)
+            self.save_.setEnabled(False)
+
+            self.F_name.setText('')
+            self.L_name.setText('')
+            self.cne.setText('')
+            self.note.setText('')
+        else:
+            curs.execute('SELECT F_name, L_name, cne, note FROM sellers WHERE F_name LIKE "{}" AND L_name LIKE "{}"'
+                .format(self.cliients_names_combo.currentText().split('|')[0], self.cliients_names_combo.currentText().split('|')[1]))
+            info = curs.fetchone()
+            print(info)
+
+            self.F_name.setEnabled(True)
+            self.L_name.setEnabled(True)
+            self.cne.setEnabled(True)
+            self.note.setEnabled(True)
+            self.save_.setEnabled(True)
+
+            self.F_name.setText(info[0])
+            self.L_name.setText(info[1])
+            self.cne.setText(info[2])
+            self.note.setText(info[3])
+
+
+    def refresh(self):
+        self.cliients_names_combo.clear()
+        curs.execute('SELECT F_name, L_name FROM sellers')
+        names =['']
+        for i in curs.fetchall():
+            names.append(i[0] + '|' + i[1])
+        
+        self.cliients_names_combo.addItems(names)
+
+
+
+    def DONE(self):
+        self.close()
+        self.home = Home()
+        self.home.show()
+
+
+
+
+class Edite_art(QWidget, edite_art_win_dir):
+    def __init__(self, parent = None):
+        super(Edite_art, self).__init__(parent)
+        QWidget.__init__(self)
+        self.setupUi(self)
+        self.done.clicked.connect(self.DONE)
+        self.articles_combo.currentTextChanged.connect(self.selected)
+        self.refresh()
+        self.save_.clicked.connect(self.save)
+
+
+    def save(self):
+        curs.execute('UPDATE articles SET name = "{}", type = "{}", qt = {}, price = {}, note = "{}" WHERE name LIKE "{}" '
+        .format(self.name.text(), self.type.text(), self.qt.text(), self.price.text(), self.note.toPlainText(), self.articles_combo.currentText() ))
+        conn.commit()
+        self.articles_combo.setCurrentIndex(0)
+        self.refresh()
+
+    def selected(self):
+        if self.articles_combo.currentText() == '':
+            self.name.setEnabled(False)
+            self.type.setEnabled(False)
+            self.qt.setEnabled(False)
+            self.price.setEnabled(False)
+            self.note.setEnabled(False)
+            self.save_.setEnabled(False)
+
+            self.name.setText('')
+            self.type.setText('')
+            self.qt.setText('')
+            self.price.setText('')
+            self.note.setText('')
+        else:
+            curs.execute('SELECT name, type, qt, price, note FROM articles WHERE name LIKE "{}" '
+                .format(self.articles_combo.currentText()))
+            info = curs.fetchone()
+            print(info)
+
+            self.name.setEnabled(True)
+            self.type.setEnabled(True)
+            self.qt.setEnabled(True)
+            self.price.setEnabled(True)
+            self.note.setEnabled(True)
+            self.save_.setEnabled(True)
+
+            self.name.setText(info[0])
+            self.type.setText(info[1])
+            self.qt.setText(str(info[2]))
+            self.price.setText(str(info[3]))
+            self.note.setText(info[4])
+
+
+    def refresh(self):
+        self.articles_combo.clear()
+        curs.execute('SELECT name FROM articles')
+        names =['']
+        for i in curs.fetchall():
+            names.append(i[0])
+        
+        self.articles_combo.addItems(names)
+
+
+
+    def DONE(self):
+        self.close()
+        self.home = Home()
+        self.home.show()
+
+
+
+
 class Home(QWidget, home_win_dir):# almost...
     def __init__(self, parent = None):
         super(Home, self).__init__(parent)
@@ -744,6 +1105,8 @@ class Home(QWidget, home_win_dir):# almost...
         self.buy_article_qt.valueChanged.connect(self.on_buy_qt_spin_box_changed)
         self.sell_date_to_pay.setDateTime(QtCore.QDateTime.currentDateTime())
         self.add_client_Button.clicked.connect(self.add_new_client)
+        self.add_seller_Button.clicked.connect(self.add_new_seller)
+        self.add_art_Button.clicked.connect(self.add_new_article)
         self.buy_articl_name_lineEdit.hide()
         self.buy_choose_article_comboBox.hide()
         self.buy_new_article.clicked.connect(self.new_art_)
@@ -755,16 +1118,95 @@ class Home(QWidget, home_win_dir):# almost...
         self.buy_and_buy_history_Button.clicked.connect(self.open_buy_history)
         self.exit_Button.clicked.connect(self.exit)
         self.remove_client_Button.clicked.connect(self.delete_client)
+        self.remove_seller_Button.clicked.connect(self.remove_seller)
         self.take_kridi_btn.clicked.connect(self.fix_C_kridi)
         self.pay_kridi_btn.clicked.connect(self.fix_S_kridi)
         self.C_kridi_history_btn.clicked.connect(self.c_k_history)
         self.S_kridi_history_btn.clicked.connect(self.s_k_history)
         self.edit_client_Button.clicked.connect(self.edit_client)
+        self.edit_seller_Button.clicked.connect(self.edit_seller)
+        self.edit_art_Button.clicked.connect(self.edit_article)
         # self.print_clients_table.clicked.connect(self.print_clients_info)
-        self.searsh_client_EditText.textChanged.connect(self.searsh)
+        self.searsh_client_EditText.textChanged.connect(self.searsh_clients)
+        self.searsh_seller_EditText.textChanged.connect(self.searsh_sellers)
+        self.searsh_art.textChanged.connect(self.searsh_articles)
 
 
-    def searsh(self):
+    def searsh_articles(self):
+        # self.searsh_art.setText('*' + self.searsh_art.text() + '*')
+        if self.searsh_art.text() != '' or self.searsh_art.text() != ' ':
+            #sellers table
+            while self.articles_table.rowCount() > 0 :
+                self.articles_table.removeRow(0)
+            curs.execute('''
+            SELECT name,  type, qt, price, note FROM articles 
+                WHERE name LIKE "{}" OR type LIKE "{}" OR qt = "{}" OR price = "{}" OR note LIKE "{}"'''
+            .format( '%' + str(self.searsh_art.text()) + '%', '%' + str(self.searsh_art.text()) + '%', '%' + self.searsh_art.text() + '%', '%' + self.searsh_art.text() + '%',
+            '%' + self.searsh_art.text() + '%'))
+            # print(curs.fetchall())
+            rus__ = curs.fetchall()
+            self.articles_table.setRowCount(0)
+            for r_n, r_d in enumerate(rus__):
+                self.articles_table.insertRow(r_n)
+                for c_n, d in enumerate(r_d):
+                    self.articles_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
+
+
+        else:
+
+            #sellers table
+            while self.articles_table.rowCount() > 0 :
+                self.articles_table.removeRow(0)
+            curs.execute(
+                'SELECT  name,  type, qt, price, note  FROM articles ORDER BY ID DESC;')
+            rus__ = curs.fetchall()
+            self.articles_table.setRowCount(0)
+            for r_n, r_d in enumerate(rus__):
+                self.articles_table.insertRow(r_n)
+                for c_n, d in enumerate(r_d):
+                    self.articles_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
+
+
+
+
+
+
+    def searsh_sellers(self):
+        # self.searsh_seller_EditText.setText('*' + self.searsh_seller_EditText.text() + '*')
+        if self.searsh_seller_EditText.text() != '' or self.searsh_seller_EditText.text() != ' ':
+            #sellers table
+            while self.sellers_table.rowCount() > 0 :
+                self.sellers_table.removeRow(0)
+            curs.execute('''
+            SELECT F_name,  L_name, cne, total_debted, total_recived, total_rest, pay_date, note FROM sellers 
+                WHERE F_name LIKE "{}" OR L_name LIKE "{}" OR cne LIKE "{}" OR total_debted = "{}" OR total_recived = "{}" OR pay_date LIKE "{}" OR note LIKE "{}"'''
+            .format('%' + self.searsh_seller_EditText.text() + '%', '%' + self.searsh_seller_EditText.text() + '%', '%' + self.searsh_seller_EditText.text() + '%',
+            '%' + self.searsh_seller_EditText.text() + '%', '%' + str(self.searsh_seller_EditText.text()) + '%', '%' + str(self.searsh_seller_EditText.text()) + '%', 
+            '%' + self.searsh_seller_EditText.text() + '%'))
+            # print(curs.fetchall())
+            rus__ = curs.fetchall()
+            self.sellers_table.setRowCount(0)
+            for r_n, r_d in enumerate(rus__):
+                self.sellers_table.insertRow(r_n)
+                for c_n, d in enumerate(r_d):
+                    self.sellers_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
+
+
+        else:
+
+            #sellers table
+            while self.sellers_table.rowCount() > 0 :
+                self.sellers_table.removeRow(0)
+            curs.execute(
+                'SELECT  F_name,  L_name, cne, total_debted, total_recived, total_rest, pay_date, note FROM sellers ORDER BY ID DESC;')
+            rus__ = curs.fetchall()
+            self.sellers_table.setRowCount(0)
+            for r_n, r_d in enumerate(rus__):
+                self.sellers_table.insertRow(r_n)
+                for c_n, d in enumerate(r_d):
+                    self.sellers_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
+
+    def searsh_clients(self):
         # self.searsh_client_EditText.setText('*' + self.searsh_client_EditText.text() + '*')
         if self.searsh_client_EditText.text() != '' or self.searsh_client_EditText.text() != ' ':
             #clients table
@@ -1007,11 +1449,28 @@ class Home(QWidget, home_win_dir):# almost...
         while self.sellers_table.rowCount() > 0 :
             self.sellers_table.removeRow(0)
 
+        curs.execute(
+            'SELECT  F_name,  L_name, cne, total_debted, total_recived, total_rest, pay_date, note FROM sellers ORDER BY ID DESC;')
+        rus__ = curs.fetchall()
+        self.sellers_table.setRowCount(0)
+        for r_n, r_d in enumerate(rus__):
+            self.sellers_table.insertRow(r_n)
+            for c_n, d in enumerate(r_d):
+                self.sellers_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
+
+
         #articles table
 
         while self.articles_table.rowCount() > 0 :
             self.articles_table.removeRow(0)
-
+        curs.execute(
+            'SELECT name, type, qt, price, note FROM articles ORDER BY ID DESC;')
+        rus__ = curs.fetchall()
+        self.articles_table.setRowCount(0)
+        for r_n, r_d in enumerate(rus__):
+            self.articles_table.insertRow(r_n)
+            for c_n, d in enumerate(r_d):
+                self.articles_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
         while self.C_kridi_table.rowCount() > 0 :
             self.C_kridi_table.removeRow(0)
@@ -1134,7 +1593,6 @@ class Home(QWidget, home_win_dir):# almost...
             self.err.setWindowTitle('خطأ')
             self.sell_qt.setFocus()
         elif self.sell_pay_by_debt_radioButton.isChecked():
-###################
             curs.execute('SELECT price FROM articles WHERE name LIKE "{}" '.format(
                 self.sell_choose_article_comboBox.currentText()))
             price = curs.fetchone()[0]
@@ -1164,8 +1622,6 @@ class Home(QWidget, home_win_dir):# almost...
                 curs.execute('UPDATE C_kridi SET total_rest = debte - total_recived')
 
                 conn.commit()
-
-########################
             curs.execute('''
             UPDATE articles 
             SET qt = qt - {}
@@ -1491,8 +1947,7 @@ class Home(QWidget, home_win_dir):# almost...
         self.add_client_wn = ADD_new_client()
         self.add_client_wn.show()
 
-    def remove_client(self):
-        pass
+    
 
     def edit_client(self):
         self.close()
@@ -1503,25 +1958,35 @@ class Home(QWidget, home_win_dir):# almost...
         pass
 
     def add_new_seller(self):
-        pass
+        self.close()
+        self.add_seller_wn = ADD_new_seller()
+        self.add_seller_wn.show()
 
     def remove_seller(self):
-        pass
+        self.close()
+        self.delete_seller_win = Remove_seller()
+        self.delete_seller_win.show()
 
     def edit_seller(self):
-        pass
+        self.close()
+        self.edite = Edite_seller()
+        self.edite.show()
 
     def search_seller(self):
         pass
 
     def add_new_article(self):
-        pass
+        self.close()
+        self.add_art_wn = ADD_new_art()
+        self.add_art_wn.show()
 
     def remove_article(self):
         pass
 
     def edit_article(self):
-        pass
+        self.close()
+        self.edit_art = Edite_art()
+        self.edit_art.show()
 
     def search_article(self):
         pass
