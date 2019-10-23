@@ -2952,7 +2952,7 @@ padding: 7px;</string>
       </rect>
      </property>
      <property name="title">
-      <string>GroupBox</string>
+      <string>الزبائن</string>
      </property>
      <widget class="QTableWidget" name="C_kridi_table">
       <property name="geometry">
@@ -3040,7 +3040,7 @@ padding: 7px;</string>
       </rect>
      </property>
      <property name="title">
-      <string>GroupBox</string>
+      <string>الموزعين</string>
      </property>
      <widget class="QPushButton" name="pay_kridi_btn">
       <property name="geometry">

@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.uic import loadUiType
+from PyQt5.uic import *
 
 import os
 from os import path
@@ -24,7 +24,7 @@ first_open_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "first_open_
 home_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "home.ui"))
 splash_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "splash.ui"))
 virification_alert_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "virification_alert.ui"))
-#TODO : # setting_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "setting.ui"))
+setting_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "setting.ui"))
 history_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "history.ui"))
 add_new_pea_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "add_new_pea.ui"))
 add_new_art_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "add_new_art.ui"))
@@ -41,18 +41,14 @@ conn = sqlite3.connect('src/db.db')
 curs = conn.cursor()
 curs.execute('CREATE TABLE IF NOT EXISTS user (NAME TEXT, PASSWORD TEXT)')
 
-# curs.execute('INSERT INTO clients ( F_name, L_name, cne, total_debted, total_recived, total_rest, pay_date, note) VALUES ("{}", "{}", "{}", {}, {}, {}, "{}", "{}" ); '.format('qq', 'qq', 'qq', 77, 77, 77, str(today), 'note'))
-# conn.commit()
 
-class Splash(QWidget, splash_win_dir):#TODO :DONE
+class Splash(QWidget, splash_win_dir):#DONE
     def __init__(self, parent = None):
         super(Splash, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
-        # self.setWindowTitle("yassine")
-        # self.progress()
-        # self.prog()
-        # self.show()
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('مرحبا')
         self.timer = QBasicTimer()
         self.step = 0
         self.prog()
@@ -66,15 +62,16 @@ class Splash(QWidget, splash_win_dir):#TODO :DONE
             self.timer.stop()
             curs.execute('SELECT first FROM tools')
             first_stat = curs.fetchone()
-            # print(kk[0])
             if first_stat[0] == 1:
                 print('its the first open ')
-                self.first_open_w = FirstOpen()
-                self.first_open_w.show()
-                self.close()
+                wilco_msg = QMessageBox.information(self, '', "بما أنها المرة الأولى هناك بعض المعلومات يجب تحديثها ", QMessageBox.Ok)
+                if wilco_msg == QMessageBox.Ok:
+                    self.first_open_w = FirstOpen()
+                    self.first_open_w.show()
+                    self.close()
 
             else:
-                curs.execute('SELECT safe FROM tools ;')
+                curs.execute('SELECT safe FROM tools ')
                 curent_safe_stat = curs.fetchone()
                 if curent_safe_stat[0] == 0:
                     print('its not the the first open ')
@@ -85,35 +82,19 @@ class Splash(QWidget, splash_win_dir):#TODO :DONE
                     self.home_wn = Home()
                     self.home_wn.show()
                     self.close()
-            # f = open("ya.txt", "r")
-            # jj = f.read()
-            # if jj == "a":
-            #     print('its : ', jj)
-            #     w = open("ya.txt", "w")
-            #     w.write("b")
-            #     self.first_open_w = FirstOpen()
-            #     self.first_open_w.show()
-            #     self.close()
-            # else:
-            #     self.virification_alert_wn = VirificationAlert()
-            #     self.virification_alert_wn.show()
-            #     self.close()
-
+           
             return
         self.step += 4
         self.progressBar.setValue(self.step)
 
-
-
-
-#///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class FirstOpen(QMainWindow, first_open_win_dir):# almost done
+class FirstOpen(QMainWindow, first_open_win_dir):# done
     def __init__(self, parent = None):
         super(FirstOpen, self).__init__(parent)
         QMainWindow.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('نقطة البداية')
         self.save_btn.clicked.connect(self.save_info_first_open)
-        # .setEchoMode(QtGui.QLineEdit.Password)
         self.pass_entry.setEchoMode(QLineEdit.Password)
         self.pass_confirmation.setEchoMode(QLineEdit.Password)
 
@@ -121,28 +102,22 @@ class FirstOpen(QMainWindow, first_open_win_dir):# almost done
     def save_info_first_open(self):
         print(self.user_name_entry.text(),  self.pass_entry.text())
         if self.user_name_entry.text() == '' or self.user_name_entry.text() == ' ' or self.user_name_entry.text() == 0 :
-            print('the user name cant be null ')
             self.err = QtWidgets.QErrorMessage()
             self.err.showMessage('لايمكن ترك إسم المستخدم فارغ ')
             self.err.setWindowTitle('خطأ')
             self.user_name_entry.setFocus()
 
         elif self.safe_mod_checkBox.isChecked():
-            print('safe mod is activated')
             curs.execute('INSERT INTO user (NAME, PASSWORD) VALUES ( "{}", "{}" ); '.format(self.user_name_entry.text(), ''))
             curs.execute('UPDATE tools SET user = "{}" , safe = 1  ;'.format(self.user_name_entry.text()))
             curs.execute('UPDATE tools SET first = {}'.format(2))
             conn.commit()
-            print('user : {}'.format(self.user_name_entry.text()))
-            wilcome_msg = QMessageBox.information(self, 'the title ', 'the message', QMessageBox.Ok)
+            wilcome_msg = QMessageBox.information(self, '', "تم تحديث المعلومات بنجاح", QMessageBox.Ok)
             if wilcome_msg == QMessageBox.Ok:
-                print('OK was clicked')
                 self.home_wn = Home()
                 self.home_wn.show()
                 self.close()
         else:
-
-            print('safe mode is not activated ')
             if self.pass_entry.text() == '' or self.pass_entry.text() == ' ':
                 self.err = QtWidgets.QErrorMessage()
                 self.err.showMessage('كلمة مرور غير صالحة ')
@@ -150,35 +125,30 @@ class FirstOpen(QMainWindow, first_open_win_dir):# almost done
                 self.pass_entry.setFocus()
 
             elif self.pass_confirmation.text() == '' or self.pass_confirmation.text() == ' ' or self.pass_confirmation.text() != self.pass_entry.text():
-                print('the fucking password is in wrong format ')
                 self.err = QtWidgets.QErrorMessage()
                 self.err.showMessage('الكلمات غير متطابقة ')
                 self.err.setWindowTitle('خطأ')
                 self.pass_confirmation.setFocus()
             else:
-                print('all DONE')
-                curs.execute(
-                    'INSERT INTO user (NAME, PASSWORD) VALUES ( "{}", "{}" ); '.format(self.user_name_entry.text(),self.pass_entry.text()))
-                curs.execute('UPDATE tools SET user = "{}", first = {} , safe = 0 ;'.format(self.user_name_entry.text(), 2))
-                # curs.execute('UPDATE tools SET first = {}'.format(2))
+                curs.execute('INSERT INTO user (NAME, PASSWORD) VALUES ( "{}", "{}" ) '.format(self.user_name_entry.text(),self.pass_entry.text()))
+                curs.execute('UPDATE tools SET user = "{}", first = {} , safe = 0 '.format(self.user_name_entry.text(), 2))
                 conn.commit()
                 self.user_name_entry.setText('')
                 self.pass_entry.setText('')
                 self.pass_confirmation.setText('')
-                #TODO : add nice wilcome message
-                wilcome_msg = QMessageBox.information(self, 'the title ', "the nice it'll be here soon ", QMessageBox.Ok)
+                wilcome_msg = QMessageBox.information(self, '', "تم تحديث المعلومات بنجاح", QMessageBox.Ok)
                 if wilcome_msg == QMessageBox.Ok:
-                    print('OK was clicked')
                     self.home_wn = Home()
                     self.home_wn.show()
                     self.close()
-#///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class Selles_history(QWidget, history_win_dir):
+class Selles_history(QWidget, history_win_dir):#DONE
     def __init__(self, parent = None):
         super(Selles_history, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('سجل المبيعات')
         self.refresh_()
         self.back_from_history.clicked.connect(self.back_home)
         self.print_history.clicked.connect(self.print_selles_history)
@@ -203,14 +173,13 @@ class Selles_history(QWidget, history_win_dir):
             for c_n, d in enumerate(r_d):
                 self.selles_history_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
-        print(curs.fetchall())
-
-
-class Buyes_history(QWidget, history_win_dir):
+class Buyes_history(QWidget, history_win_dir):#DONE
     def __init__(self, parent = None):
         super(Buyes_history, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('سجل المشتريات')
         self.refresh_()
         self.back_from_history.clicked.connect(self.back_home)
         self.print_history.clicked.connect(self.print_buyes_history)
@@ -237,11 +206,13 @@ class Buyes_history(QWidget, history_win_dir):
 
         print(curs.fetchall())
 
-class ADD_new_client(QWidget, add_new_pea_win_dir):# DONE
+class ADD_new_client(QWidget, add_new_pea_win_dir):#DONE
     def __init__(self, parent = None):
         super(ADD_new_client, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('إظافة زبون')
         self.cancel_btn.clicked.connect(self.cancel)
         self.save_new_client.clicked.connect(self.save_new_client_)
 
@@ -263,14 +234,12 @@ class ADD_new_client(QWidget, add_new_pea_win_dir):# DONE
             self.clients_cne_list = []
             curs.execute('SELECT cne FROM clients')
             for cne in curs.fetchall():
-                # print('#####################\n', cne[0], '##', '\n#######################')
                 self.clients_cne_list.append(cne[0])
 
             curs.execute('SELECT F_name, L_name FROM clients')
             for fname, lname in curs.fetchall():
                 self.clients_full_names.append(fname + ' ' + lname)
 
-            print('Clients full names list \n******************************************\n{}\n***************************'.format(self.clients_full_names))
             if self.F_name.text() + ' ' + self.L_name.text() in self.clients_full_names:
                 current_info = curs.execute('SELECT F_name, L_name, cne FROM clients'
                                             ' WHERE F_name LIKE "{}" AND L_name LIKE "{}";'.format(self.F_name.text(),
@@ -281,10 +250,9 @@ class ADD_new_client(QWidget, add_new_pea_win_dir):# DONE
                     self.current.append(oo[0])
                     self.current.append(oo[1])
                     self.current.append(oo[2])
-                print('##########', self.current)
+                
                 self.err = QtWidgets.QErrorMessage()
-                self.err.showMessage(
-                    ' هذا الزبون موجود بالفعل في قاعدة البيانات \n #الإسم : " ‏؜{} "  #اللقب : " {} "  #البطاقة الوطنية : " {} " '
+                self.err.showMessage(' هذا الزبون موجود بالفعل في قاعدة البيانات \n #الإسم : " ‏؜{} "  #اللقب : " {} "  #البطاقة الوطنية : " {} " '
                     .format(str(self.current[0]), str(self.current[1]), str(self.current[2])))
                 self.err.setWindowTitle('هذا الزبون موجود في قاعدة البيانات')
                 self.F_name.setFocus()
@@ -303,7 +271,7 @@ class ADD_new_client(QWidget, add_new_pea_win_dir):# DONE
 
                 if self.note.text() == '' or self.note.text() == ' ':
                     self.note.setText('-')
-                #
+                
                 curs.execute('INSERT INTO clients (F_name, L_name, cne, note) VALUES("{}", "{}", "{}", "{}");'
                              .format(self.F_name.text(), self.L_name.text(), self.cne.text(), self.note.text()))
 
@@ -313,21 +281,19 @@ class ADD_new_client(QWidget, add_new_pea_win_dir):# DONE
                 self.L_name.setText('')
                 self.cne.setText('')
                 self.note.setText('')
-                # self.cancel()
-                print('its broken')
 
     def cancel(self):
         self.close()
         self.home_wn = Home()
         self.home_wn.show()
 
-
-
 class ADD_new_seller(QWidget, add_new_pea_win_dir):# DONE
     def __init__(self, parent = None):
         super(ADD_new_seller, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('إظافة موزع')
         self.cancel_btn.clicked.connect(self.cancel)
         self.save_new_client.clicked.connect(self.save_new_client_)
 
@@ -349,25 +315,20 @@ class ADD_new_seller(QWidget, add_new_pea_win_dir):# DONE
             self.sellers_cne_list = []
             curs.execute('SELECT cne FROM sellers')
             for cne in curs.fetchall():
-                # print('#####################\n', cne[0], '##', '\n#######################')
                 self.sellers_cne_list.append(cne[0])
 
             curs.execute('SELECT F_name, L_name FROM sellers')
             for fname, lname in curs.fetchall():
                 self.sellers_full_names.append(fname + ' ' + lname)
 
-            print('sellers full names list \n******************************************\n{}\n***************************'.format(self.sellers_full_names))
             if self.F_name.text() + ' ' + self.L_name.text() in self.sellers_full_names:
-                current_info = curs.execute('SELECT F_name, L_name, cne FROM sellers'
-                                            ' WHERE F_name LIKE "{}" AND L_name LIKE "{}";'.format(self.F_name.text(),
-                                                                                                   self.L_name.text()))
+                current_info = curs.execute('SELECT F_name, L_name, cne FROM sellers WHERE F_name LIKE "{}" AND L_name LIKE "{}";'.format(self.F_name.text(), self.L_name.text()))
                 self.current = []
                 for oo in current_info.fetchall():
-                    print('00 = {}'.format(oo))
                     self.current.append(oo[0])
                     self.current.append(oo[1])
                     self.current.append(oo[2])
-                print('##########', self.current)
+                    
                 self.err = QtWidgets.QErrorMessage()
                 self.err.showMessage(
                     ' هذا الزبون موجود بالفعل في قاعدة البيانات \n #الإسم : " ‏؜{} "  #اللقب : " {} "  #البطاقة الوطنية : " {} " '
@@ -389,7 +350,7 @@ class ADD_new_seller(QWidget, add_new_pea_win_dir):# DONE
 
                 if self.note.text() == '' or self.note.text() == ' ':
                     self.note.setText('-')
-                #
+                
                 curs.execute('INSERT INTO sellers (F_name, L_name, cne, note) VALUES("{}", "{}", "{}", "{}");'
                              .format(self.F_name.text(), self.L_name.text(), self.cne.text(), self.note.text()))
 
@@ -399,20 +360,19 @@ class ADD_new_seller(QWidget, add_new_pea_win_dir):# DONE
                 self.L_name.setText('')
                 self.cne.setText('')
                 self.note.setText('')
-                # self.cancel()
 
     def cancel(self):
         self.close()
         self.home_wn = Home()
         self.home_wn.show()
 
-
-
 class ADD_new_art(QWidget, add_new_art_win_dir):# DONE
     def __init__(self, parent = None):
         super(ADD_new_art, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('إظافة منتوج')
         self.cancel_btn.clicked.connect(self.cancel)
         self.save_new_art.clicked.connect(self.save_new_art_)
 
@@ -448,7 +408,7 @@ class ADD_new_art(QWidget, add_new_art_win_dir):# DONE
                 curs.execute('SELECT name, qt, price FROM articles WHERE name LIKE "{}" '.format(self.name.text()))
                 
                 for oo in curs.fetchone():
-                    self.current.append(oo)#name
+                    self.current.append(oo)
                     
                 print(self.current)
                 
@@ -474,22 +434,19 @@ class ADD_new_art(QWidget, add_new_art_win_dir):# DONE
                 self.qt.setText('')
                 self.price.setText('')
                 self.note.setText('')
-                # self.cancel()
 
     def cancel(self):
         self.close()
         self.home_wn = Home()
         self.home_wn.show()
 
-
-
-
-
 class Remove_client(QWidget, delete_pea_win_dir): # DONE
     def __init__(self, parent = None):
         super(Remove_client, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('حذف زبون')
         self.fill_combo()
         self.shose_pea_to_rmv.currentTextChanged.connect(self.set_cne)
         self.rmv_btn.clicked.connect(self.delete)
@@ -501,22 +458,20 @@ class Remove_client(QWidget, delete_pea_win_dir): # DONE
         if self.shose_pea_to_rmv.currentText() != '':
             curs.execute('SELECT cne FROM clients WHERE F_name LIKE "{}" AND L_name LIKE "{}"'
                          .format(self.shose_pea_to_rmv.currentText().split('|')[0], self.shose_pea_to_rmv.currentText().split('|')[1]))
-            print(self.shose_pea_to_rmv.currentText())
-            print('selected F_name : {}'.format(self.shose_pea_to_rmv.currentText().split('|')[0]))
-            print('selected L_name : {}'.format(self.shose_pea_to_rmv.currentText().split('|')[1]))
-            # print('selected client cne : {}'.format(curs.fetchone()[0]))
+            
+            
             self.show_cne_rmv_page.setText(curs.fetchone()[0])
+
     def fill_combo(self):
         clients_names_list_ = ['']
         curs.execute('SELECT F_name, L_name  FROM clients')
         for fn, ln in curs.fetchall():
             clients_names_list_.append(fn + '|' + ln)
-        print('CLIENTS : ', clients_names_list_)
+            
         self.shose_pea_to_rmv.addItems(clients_names_list_)
 
     def delete(self):
-        print('selected F_name : {}'.format(self.shose_pea_to_rmv.currentText().split('|')[0]))
-        print('selected L_name : {}'.format(self.shose_pea_to_rmv.currentText().split('|')[1]))
+        
         curs.execute('DELETE FROM clients WHERE F_name LIKE "{}" AND L_name LIKE "{}" AND cne LIKE "{}" '
                      .format(self.shose_pea_to_rmv.currentText().split('|')[0],
                              self.shose_pea_to_rmv.currentText().split('|')[1],
@@ -535,19 +490,17 @@ class Remove_client(QWidget, delete_pea_win_dir): # DONE
         self.home = Home()
         self.home.show()
 
-
-
 class Remove_seller(QWidget, delete_pea_win_dir): # DONE
     def __init__(self, parent = None):
         super(Remove_seller, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('حذف موزع')
         self.fill_combo()
         self.shose_pea_to_rmv.currentTextChanged.connect(self.set_cne)
         self.rmv_btn.clicked.connect(self.delete_)
         self.cancel_rmv.clicked.connect(self.cncl)
-
-
 
     def set_cne(self):
         if self.shose_pea_to_rmv.currentText() != '':
@@ -560,12 +513,10 @@ class Remove_seller(QWidget, delete_pea_win_dir): # DONE
         curs.execute('SELECT F_name, L_name  FROM sellers')
         for fn, ln in curs.fetchall():
             clients_names_list_.append(fn + '|' + ln)
-        print('CLIENTS : ', clients_names_list_)
+            
         self.shose_pea_to_rmv.addItems(clients_names_list_)
 
     def delete_(self):
-        print('selected F_name : {}'.format(self.shose_pea_to_rmv.currentText().split('|')[0]))
-        print('selected L_name : {}'.format(self.shose_pea_to_rmv.currentText().split('|')[1]))
         curs.execute('DELETE FROM sellers WHERE F_name LIKE "{}" AND L_name LIKE "{}" AND cne LIKE "{}" '
                      .format(self.shose_pea_to_rmv.currentText().split('|')[0],
                              self.shose_pea_to_rmv.currentText().split('|')[1],
@@ -576,22 +527,18 @@ class Remove_seller(QWidget, delete_pea_win_dir): # DONE
         self.show_cne_rmv_page.setText('')
         conn.commit()
 
-
-
-
     def cncl(self):
         self.close()
         self.home = Home()
         self.home.show()
-
-
-
 
 class C_kridi_fix_history(QWidget, fix_kridi_history_win_dir):
     def __init__(self, parent = None):
         super(C_kridi_fix_history, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('سجل القروض المدفوعة')
         self.refresh_()
         self.back_btn.clicked.connect(self.back__)
         self.print_btn.clicked.connect(self.print_)
@@ -617,12 +564,13 @@ class C_kridi_fix_history(QWidget, fix_kridi_history_win_dir):
             for c_n, d in enumerate(r_d):
                 self.fix_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
-
-class C_kridi_fix(QWidget, fix_kridi_win_dir):
+class C_kridi_fix(QWidget, fix_kridi_win_dir):# DONE
     def __init__(self, parent = None):
         super(C_kridi_fix, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('استخلاص قرض')
         self.fill_comboB()
         self.fix_kridi_done.clicked.connect(self.done)
         self.fix_kridi_save.clicked.connect(self.save_)
@@ -632,8 +580,6 @@ class C_kridi_fix(QWidget, fix_kridi_win_dir):
         self.fix_kridi_editeLine.setValidator(QtGui.QIntValidator(1, 2147483647, self))
         self.fix_kridi_combo.currentTextChanged.connect(self.on_combo_changed)
         self.fix_kridi_history_btn.clicked.connect(self.fix_C_kridi_history)
-
-
 
     def fix_C_kridi_history(self):
         self.close()
@@ -648,7 +594,6 @@ class C_kridi_fix(QWidget, fix_kridi_win_dir):
 
         self.fix_kridi_editeLine.setText('')
         self.fix_kridi_editeLine.setFocus()
-        
 
     def check_state(self):
         color = '#b6b6b6'#normal
@@ -702,12 +647,13 @@ class C_kridi_fix(QWidget, fix_kridi_win_dir):
         except ERROR as er:
             print(er)
             
-
 class S_kridi_fix_history(QWidget, fix_kridi_history_win_dir):
     def __init__(self, parent = None):
         super(S_kridi_fix_history, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('القروض المستخلصة')
         self.refresh_()
         self.back_btn.clicked.connect(self.back__)
         self.print_btn.clicked.connect(self.print_)
@@ -738,6 +684,8 @@ class S_kridi_fix(QWidget, fix_kridi_win_dir):
         super(S_kridi_fix, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('دفع قرض')
         self.fill_comboB()
         self.fix_kridi_done.clicked.connect(self.done)
         self.fix_kridi_save.clicked.connect(self.save_)
@@ -813,14 +761,15 @@ class S_kridi_fix(QWidget, fix_kridi_win_dir):
                     .format(str(today), self.fix_kridi_combo.currentText(), self.fix_kridi_editeLine.text(), curs.fetchone()[0]))
             conn.commit()
         except ERROR as er:
-            print(er)
-           
+            print(er)      
  
 class C_kridi_history(QWidget, kridi_history_win_dir):
     def __init__(self, parent = None):
         super(C_kridi_history, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('القروض السابقة')
         self.back_from_history.clicked.connect(self.bback)
         self.print_history.clicked.connect(self.pprint)
         self.refresh()
@@ -846,14 +795,13 @@ class C_kridi_history(QWidget, kridi_history_win_dir):
         self.home = Home()
         self.home.show()
 
-
-
-
 class S_kridi_history(QWidget, kridi_history_win_dir):
     def __init__(self, parent = None):
         super(S_kridi_history, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('القروض السابقة')
         self.back_from_history.clicked.connect(self.bback)
         self.print_history.clicked.connect(self.pprint)
         self.refresh()
@@ -884,6 +832,8 @@ class Edite_client(QWidget, edite_pea_win_dir):
         super(Edite_client, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('تعديل')
         self.done.clicked.connect(self.DONE)
         self.cliients_names_combo.currentTextChanged.connect(self.selected)
         self.refresh()
@@ -944,12 +894,13 @@ class Edite_client(QWidget, edite_pea_win_dir):
         self.home = Home()
         self.home.show()
 
-
 class Edite_seller(QWidget, edite_pea_win_dir):
     def __init__(self, parent = None):
         super(Edite_seller, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('تعديل')
         self.done.clicked.connect(self.DONE)
         self.cliients_names_combo.currentTextChanged.connect(self.selected)
         self.refresh()
@@ -1010,14 +961,13 @@ class Edite_seller(QWidget, edite_pea_win_dir):
         self.home = Home()
         self.home.show()
 
-
-
-
 class Edite_art(QWidget, edite_art_win_dir):
     def __init__(self, parent = None):
         super(Edite_art, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('تعديل')
         self.done.clicked.connect(self.DONE)
         self.articles_combo.currentTextChanged.connect(self.selected)
         self.refresh()
@@ -1081,9 +1031,6 @@ class Edite_art(QWidget, edite_art_win_dir):
         self.home = Home()
         self.home.show()
 
-
-
-
 class Home(QWidget, home_win_dir):# almost...
     def __init__(self, parent = None):
         super(Home, self).__init__(parent)
@@ -1091,10 +1038,7 @@ class Home(QWidget, home_win_dir):# almost...
         self.setupUi(self)
         self.logOut_Button.clicked.connect(self.log_out)
         self.refresh_data()
-        # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
-
-        # self.home_tabWidget.setCurrentIndex(current_tab)
         self.home_tabWidget.currentChanged.connect(self.onTabChange)
         self.setWindowTitle('الرئيسية')
         self.sell_choose_article_comboBox.currentTextChanged.connect(self.set_sell_article_type)
@@ -1130,6 +1074,7 @@ class Home(QWidget, home_win_dir):# almost...
         self.searsh_client_EditText.textChanged.connect(self.searsh_clients)
         self.searsh_seller_EditText.textChanged.connect(self.searsh_sellers)
         self.searsh_art.textChanged.connect(self.searsh_articles)
+        self.setting_Button.clicked.connect(self.settt)
 
 
     def searsh_articles(self):
@@ -1165,11 +1110,6 @@ class Home(QWidget, home_win_dir):# almost...
                 self.articles_table.insertRow(r_n)
                 for c_n, d in enumerate(r_d):
                     self.articles_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
-
-
-
-
-
 
     def searsh_sellers(self):
         # self.searsh_seller_EditText.setText('*' + self.searsh_seller_EditText.text() + '*')
@@ -1241,7 +1181,6 @@ class Home(QWidget, home_win_dir):# almost...
                 for c_n, d in enumerate(r_d):
                     self.clients_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
-
     #TODO PRINT 
     # self print_clients_info(self):
     #     pass
@@ -1261,7 +1200,6 @@ class Home(QWidget, home_win_dir):# almost...
         self.fix_C_K = C_kridi_fix()
         self.fix_C_K.show()
 
-
     def fix_S_kridi(self):
         self.close()
         self.fix_S_K = S_kridi_fix()
@@ -1275,8 +1213,6 @@ class Home(QWidget, home_win_dir):# almost...
     def exit(self):
         conn.close()
         self.close()
-
-
 
     def set_bb_article_type(self):
 
@@ -1338,7 +1274,7 @@ class Home(QWidget, home_win_dir):# almost...
         self.fill_combos()
 
 
-    def onTabChange(self): #todo Fix this shit
+    def onTabChange(self): #TODO Fix this shit
         print('the current tab is : ', self.home_tabWidget.currentIndex())
         self.refresh_data()
         if self.home_tabWidget.currentIndex() == 0:
@@ -1347,20 +1283,23 @@ class Home(QWidget, home_win_dir):# almost...
 
         elif self.home_tabWidget.currentIndex() == 1:
             # current_tab = 1
-            self.setWindowTitle('معاملات')
+            self.setWindowTitle('المعاملات')
 
         elif self.home_tabWidget.currentIndex() == 2:
             # current_tab = 2
-            self.setWindowTitle('الزبائن')
+            self.setWindowTitle('القروض')
 
         elif self.home_tabWidget.currentIndex() == 3:
             # current_tab = 3
-            self.setWindowTitle('الموزعين')
+            self.setWindowTitle('الزبائن')
 
         elif self.home_tabWidget.currentIndex() == 4:
             # current_tab = 4
-            self.setWindowTitle('السلع')
+            self.setWindowTitle('الموزعين')
 
+        elif self.home_tabWidget.currentIndex() == 5:
+            # current_tab = 4
+            self.setWindowTitle('السلع')
 
     def refresh_labels(self):
         curs.execute('SELECT NAME FROM user')
@@ -1391,8 +1330,6 @@ class Home(QWidget, home_win_dir):# almost...
         clients_pay_today_list = curs.fetchone()[0]
         
         self.clients_must_pay_counter_today.setText(str(clients_pay_today_list))
-
-
 
     def refresh_tables(self):
         curs.execute('UPDATE clients SET total_rest = total_debted - total_recived')
@@ -1509,7 +1446,6 @@ class Home(QWidget, home_win_dir):# almost...
             for c_n, d in enumerate(r_d):
                 self.S_kridi_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
-
     def fill_combos(self):
 
         self.sell_choose_article_comboBox.clear()
@@ -1574,7 +1510,6 @@ class Home(QWidget, home_win_dir):# almost...
         elif self.buy_art_stat == 'new':
             total_price = self.buy_article_qt.value() * self.buy_article_price.value()
             self.total_buying_price.setText(str(total_price) + ' DH')
-
 
     def save_sell_operation(self):
         if str(self.sell_choose_article_comboBox.currentText()) == '' or  str(self.sell_choose_article_comboBox.currentText()) == ' ':
@@ -1699,7 +1634,6 @@ class Home(QWidget, home_win_dir):# almost...
             self.sell_choose_buyer_comboBox.setCurrentIndex(0)
             self.sell_qt.setValue(0)
             self.refresh_data()
-
 
     def save_buy_operation(self):
 
@@ -1947,15 +1881,10 @@ class Home(QWidget, home_win_dir):# almost...
         self.add_client_wn = ADD_new_client()
         self.add_client_wn.show()
 
-    
-
     def edit_client(self):
         self.close()
         self.edite = Edite_client()
         self.edite.show()
-
-    def search_client(self):
-        pass
 
     def add_new_seller(self):
         self.close()
@@ -1972,9 +1901,6 @@ class Home(QWidget, home_win_dir):# almost...
         self.edite = Edite_seller()
         self.edite.show()
 
-    def search_seller(self):
-        pass
-
     def add_new_article(self):
         self.close()
         self.add_art_wn = ADD_new_art()
@@ -1987,16 +1913,19 @@ class Home(QWidget, home_win_dir):# almost...
         self.close()
         self.edit_art = Edite_art()
         self.edit_art.show()
+    
+    def settt(self):
+        self.close()
+        self.setti = Setting_wn()
+        self.setti.show()
 
-    def search_article(self):
-        pass
-#///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class Reset_pass(QMainWindow, first_open_win_dir):
     def __init__(self, parent=None):
         super(Reset_pass, self).__init__(parent)
         QMainWindow.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
         self.setWindowTitle('إستعادة كلمة المرور ')
         self.save_btn.clicked.connect(self.reset__)
         self.safe_mod_checkBox.hide()
@@ -2058,6 +1987,8 @@ class VirificationAlert(QWidget, virification_alert_win_dir):
         super(VirificationAlert, self).__init__(parent)
         QWidget.__init__(self)
         self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('تأكيد الهوية')
         self.setFixedSize(289,161)
         self.virif_btn.clicked.connect(self.virife_password)
         self.virif_pass_line.setEchoMode(QLineEdit.Password)
@@ -2099,26 +2030,89 @@ class VirificationAlert(QWidget, virification_alert_win_dir):
     def get_help(self, event):
         print('the help was clicked')
 
-#///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#TODO
-# class Setting(QWidget, setting_win_dir):
-#     def __init__(self, parent = None):
-#         super(Setting, self).__init__(parent)
-#         QWidget.__init__(self)
-#         self.setupUi(self)
-#///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# class History(QWidget, history_win_dir):
-#     def __init__(self, parent = None):
-#         super(History, self).__init__(parent)
-#         QWidget.__init__(self)
-#         self.setupUi(self)
-#///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# class Help(QWidget, history_win_dir):
-#     def __init__(self, parent = None):
-#         super(History, self).__init__(parent)
-#         QWidget.__init__(self)
-#         self.setupUi(self)
-#///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class Setting_wn(QWidget, setting_win_dir):
+    def __init__(self, parent = None):
+        super(Setting_wn, self).__init__(parent)
+        QWidget.__init__(self)
+        self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('إعدادات')
+        self.bbb.setSource(QtCore.QUrl.fromLocalFile("src/ttt.html"))
+        self.current_pass.textChanged.connect(self.onTextChange)
+        self.confirm_pass.textChanged.connect(self.onTChange)
+        self.save_pass.setEnabled(False)
+        self.back_btn.clicked.connect(self.back__)
+        self.save_pass.clicked.connect(self.save_thePass)
+        curs.execute('SELECT safe FROM tools')
+        self.safe = curs.fetchone()[0]
+        if self.safe == 1 :
+            self.current_pass.setEnabled(False)
+            self.new_pass.setEnabled(True)
+            self.confirm_pass.setEnabled(True)
+        
+        self.ref()
+        self.save_user_info.clicked.connect(self.save_info)
+
+    
+    
+    def save_info(self):
+        curs.execute('UPDATE user SET NAME = "{}", market_name = "{}", phone = "{}", adress = "{}"'.format(self.user_name.text(), self.market_name.text(), 
+        str(self.phone.text()), self.adress.text()))
+        conn.commit()
+        self.ref()
+
+    def ref(self):
+        curs.execute('SELECT NAME, market_name, phone, adress FROM user')
+        info = []
+        for i in curs.fetchone():
+            info.append(i)
+    
+        self.user_name.setText(info[0])
+        self.market_name.setText(info[1])
+        self.phone.setText(info[2])
+        self.adress.setText(info[3])
+            
+
+
+    def save_thePass(self):
+        if self.safe_check.isChecked():
+            curs.execute('UPDATE tools SET safe = 1')
+            curs.execute('UPDATE user SET PASSWORD = NULL')
+        else:
+            curs.execute('UPDATE user SET PASSWORD = "{}"'.format(self.confirm_pass.text()))
+            curs.execute('UPDATE tools SET safe = 0')
+        conn.commit()
+        self.current_pass.setText('')
+        self.new_pass.setText('')
+        self.confirm_pass.setText('')
+
+    def back__(self):
+        self.close()
+        self.home = Home()
+        self.home.show()
+
+    def onTextChange(self):
+        if self.current_pass.text() == '' or self.current_pass.text() == ' ':
+            self.save_pass.setEnabled(False)
+
+        else:
+            curs.execute('SELECT PASSWORD FROM user')
+            if curs.fetchone()[0] == self.current_pass.text():
+                self.new_pass.setEnabled(True)
+                self.confirm_pass.setEnabled(True)
+                self.safe_check.setEnabled(True)
+            else:
+                self.new_pass.setEnabled(False)
+                self.confirm_pass.setEnabled(False)
+                self.safe_check.setEnabled(False)
+
+    def onTChange(self):
+        if self.confirm_pass.text() == self.new_pass.text():
+            self.save_pass.setEnabled(True)
+        else:
+            self.save_pass.setEnabled(False)
+
 
 def delay_counter():
     curs.execute('SELECT delay FROM tools;')
