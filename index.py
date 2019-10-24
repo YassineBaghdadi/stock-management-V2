@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets, QtCore, QtGui, QtPrintSupport
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -100,7 +100,6 @@ class FirstOpen(QMainWindow, first_open_win_dir):# done
 
 
     def save_info_first_open(self):
-        print(self.user_name_entry.text(),  self.pass_entry.text())
         if self.user_name_entry.text() == '' or self.user_name_entry.text() == ' ' or self.user_name_entry.text() == 0 :
             self.err = QtWidgets.QErrorMessage()
             self.err.showMessage('لايمكن ترك إسم المستخدم فارغ ')
@@ -1070,7 +1069,7 @@ class Home(QWidget, home_win_dir):# almost...
         self.edit_client_Button.clicked.connect(self.edit_client)
         self.edit_seller_Button.clicked.connect(self.edit_seller)
         self.edit_art_Button.clicked.connect(self.edit_article)
-        # self.print_clients_table.clicked.connect(self.print_clients_info)
+        self.print_clients_table.clicked.connect(self.print_c_info)###
         self.searsh_client_EditText.textChanged.connect(self.searsh_clients)
         self.searsh_seller_EditText.textChanged.connect(self.searsh_sellers)
         self.searsh_art.textChanged.connect(self.searsh_articles)
@@ -1182,9 +1181,13 @@ class Home(QWidget, home_win_dir):# almost...
                     self.clients_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
     #TODO PRINT 
-    # self print_clients_info(self):
-    #     pass
+    def print_c_info(self):
+        # dialog = QtPrintSupport.QPrintPreviewDialog()
+        # dialog.paintRequested.connect(self.printDocument)
+        # dialog.exec_()
+        pass
 
+   
     def c_k_history(self):
         self.c_k_h = C_kridi_history()
         self.c_k_h.show()
@@ -1919,7 +1922,6 @@ class Home(QWidget, home_win_dir):# almost...
         self.setti = Setting_wn()
         self.setti.show()
 
-
 class Reset_pass(QMainWindow, first_open_win_dir):
     def __init__(self, parent=None):
         super(Reset_pass, self).__init__(parent)
@@ -2030,7 +2032,6 @@ class VirificationAlert(QWidget, virification_alert_win_dir):
     def get_help(self, event):
         print('the help was clicked')
 
-
 class Setting_wn(QWidget, setting_win_dir):
     def __init__(self, parent = None):
         super(Setting_wn, self).__init__(parent)
@@ -2123,9 +2124,6 @@ def delay_counter():
         print(delay)
         if delay == 180000:
             break
-
-
-
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
