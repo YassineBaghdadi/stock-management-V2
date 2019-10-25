@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.uic import *
+from docx import *
 
 import os
 from os import path
@@ -787,8 +788,59 @@ class C_kridi_history(QWidget, kridi_history_win_dir):
 
 
     def pprint(self):#TODO PRINT data 
-        pass
+        file_name = QFileDialog.getSaveFileName(self, 'Open file', 'history' + str(today),"text files (*.doc *.docx)")
+        print(file_name)
+        print(file_name[0])
+        doc = Document()
+        # doc.add_heading('test heading')
+                
+        section = doc.sections[0]
 
+        heade = section.header
+        paragraph = heade.paragraphs[0]
+
+        paragraph.text = "date \n\ttitle\n\tadress\n\ttel "
+
+
+
+        curs.execute('SELECT * FROM C_kridi_history')
+        ii = curs.fetchall()
+        # print(curs.fetchall())
+
+        # for i in curs.fetchall():
+        #     ii.append(i)
+
+
+        # print(ii)
+        # get table data -------------
+
+        # add table ------------------
+        table = doc.add_table(1, 7)
+        # populate header row --------
+        heading_cells = table.rows[0].cells
+        heading_cells[0].text = 'ID'
+        heading_cells[1].text = 'date'
+        heading_cells[2].text = 'name'
+        heading_cells[3].text = 'article'
+        heading_cells[4].text = 'qt'
+        heading_cells[5].text = 'total'
+        heading_cells[6].text = 'pay_date'
+        # add a data row for each item
+        for item in ii:
+            cells = table.add_row().cells
+            cells[0].text = str(item[0])
+            cells[1].text = item[1]
+            cells[2].text = item[2]
+            cells[3].text = item[3]
+            cells[4].text = str(item[4])
+            cells[5].text = str(item[5])
+            cells[6].text = str(item[6])
+
+        table.style = 'LightShading-Accent1'
+        fff =file_name[0] + '.docx'
+        doc.save(fff)
+        # os.system(fff)
+        print(fff.split('/')[-1])
     def bback(self):
         self.close()
         self.home = Home()
