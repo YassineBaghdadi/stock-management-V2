@@ -786,34 +786,47 @@ class C_kridi_history(QWidget, kridi_history_win_dir):
             for c_n, d in enumerate(r_d):
                 self.kridi_history_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
-
-    def pprint(self):#TODO PRINT data 
-        file_name = QFileDialog.getSaveFileName(self, 'Open file', 'history' + str(today),"text files (*.doc *.docx)")
-        print(file_name)
-        print(file_name[0])
+#TODO here i am 
+    def pprint(self, location):#TODO PRINT data 
+        file_name,_ = QFileDialog.getSaveFileName(self, caption = 'حفظ في :', directory = '.', filter = "text files (*.doc *.docx)")
+        if file_name :
+            curs.execute('SELECT * FROM C_kridi_history')
+            ii = curs.fetchall()
+            print(file_name)
+            
+            # print(len(file_name.split('/')[-1].split('.')))
+            
+            if len(file_name.split('/')[-1].split('.')) == 2:
+                if file_name.split('/')[-1].split('.')[1] == 'doc' or  file_name.split('/')[-1].split('.')[1] == 'docx':
+                    # print('extention : doc or docx')
+                    self.fill_doc(file_name, ii, '\theader', '\tfooter')
+                    QApplication.processEvents()
+                else:
+                    self.err = QtWidgets.QErrorMessage()
+                    self.err.showMessage('صيغة الملف غير مقبولة')
+                    self.err.setWindowTitle('خطأ')
+                    
+            else:
+                print(' no extention')
+                file_ = file_name + '.docx'
+                self.fill_doc(file_, ii, '\theader', '\tfooter')
+                QApplication.processEvents()
+        else:
+            print('printing canceled')
+        
+    def fill_doc(self, file_name, data, h = '', f = ''):
+        from docx.shared import Inches
         doc = Document()
         # doc.add_heading('test heading')
-                
         section = doc.sections[0]
-
         heade = section.header
         paragraph = heade.paragraphs[0]
+        paragraph.text = h
 
-        paragraph.text = "date \n\ttitle\n\tadress\n\ttel "
-
-
-
-        curs.execute('SELECT * FROM C_kridi_history')
-        ii = curs.fetchall()
-        # print(curs.fetchall())
-
+        footer = section.footer
+        footer.paragraphs[0].text = f
         # for i in curs.fetchall():
-        #     ii.append(i)
-
-
-        # print(ii)
-        # get table data -------------
-
+        #     ii.appe   nd(i)
         # add table ------------------
         table = doc.add_table(1, 7)
         # populate header row --------
@@ -826,7 +839,7 @@ class C_kridi_history(QWidget, kridi_history_win_dir):
         heading_cells[5].text = 'total'
         heading_cells[6].text = 'pay_date'
         # add a data row for each item
-        for item in ii:
+        for item in data:
             cells = table.add_row().cells
             cells[0].text = str(item[0])
             cells[1].text = item[1]
@@ -837,10 +850,14 @@ class C_kridi_history(QWidget, kridi_history_win_dir):
             cells[6].text = str(item[6])
 
         table.style = 'LightShading-Accent1'
-        fff =file_name[0] + '.docx'
-        doc.save(fff)
+        # fff =file_name + '.docx'
+        #TODO 
+        doc.save(file_name)
+        print(file_name + ' : saved successfully')
         # os.system(fff)
-        print(fff.split('/')[-1])
+        # print(fff.split('/')[-1])
+
+
     def bback(self):
         self.close()
         self.home = Home()
