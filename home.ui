@@ -3444,7 +3444,7 @@ padding: 7px;</string>
       <string>تعديل</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="searsh_client_Button_5">
+    <widget class="QPushButton" name="print_sellers_info">
      <property name="geometry">
       <rect>
        <x>393</x>

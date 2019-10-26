@@ -4,6 +4,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.uic import *
 from docx import *
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.section import WD_ORIENT, WD_SECTION
 
 import os
 from os import path
@@ -42,6 +44,8 @@ conn = sqlite3.connect('src/db.db')
 curs = conn.cursor()
 curs.execute('CREATE TABLE IF NOT EXISTS user (NAME TEXT, PASSWORD TEXT)')
 
+header_ = 'this is a header'
+footer_ = 'this is a footer'
 
 class Splash(QWidget, splash_win_dir):#DONE
     def __init__(self, parent = None):
@@ -151,11 +155,95 @@ class Selles_history(QWidget, history_win_dir):#DONE
         self.setWindowTitle('سجل المبيعات')
         self.refresh_()
         self.back_from_history.clicked.connect(self.back_home)
-        self.print_history.clicked.connect(self.print_selles_history)
+        self.print_history.clicked.connect(self.pprint)
 
 
-    def print_selles_history(self):#TODO : Print selles history table
-        print('Print selles history ')
+
+
+    def pprint(self, location):#TODO PRINT data 
+
+        def fill_doc( file_name, data, h = '', f = ''):
+            from docx.shared import Inches
+            doc = Document()
+            # doc.add_heading('test heading')
+            section = doc.sections[0]
+            heade = section.header
+            paragraph = heade.paragraphs[0]
+            paragraph.text = h
+
+            footer = section.footer
+            footer.paragraphs[0].text = f
+            # for i in curs.fetchall():
+            #     ii.appe   nd(i)
+            # add table ------------------
+            curs.execute('SELECT ID, date, name, article, qt, total FROM C_kridi_history ORDER BY ID DESC')
+            statu_ = curs.fetchall()
+            table = doc.add_table(1, 6)
+            # current_section = doc.sections[-1]
+            # new_width, new_height = current_section.page_height, current_section.page_width
+            # new_section = doc.add_section(WD_SECTION.NEW_PAGE)
+            # new_section.orientation = WD_ORIENT.LANDSCAPE
+            # new_section.page_width = new_width
+            # new_section.page_height = new_height
+            # populate header row --------
+            heading_cells = table.rows[0].cells
+            header_titles =['رقم الزبون','تاريخ العملية', 'الإسم', 'السلعة', 'الكمية', 'المجموع']
+            # heading_cells[0].text = 'ID'
+            # heading_cells[1].text = 'date'
+            # heading_cells[2].text = 'name'
+            # heading_cells[3].text = 'article'
+            # heading_cells[4].text = 'qt'
+            # heading_cells[5].text = 'total'
+            # heading_cells[6].text = 'pay_date'
+            for i in range(6):
+                heading_cells[i].text = header_titles[i]
+
+            # add a data row for each item
+            for item in data:
+                cells = table.add_row().cells
+                cells[0].text = str(item[0])
+                cells[1].text = str(item[1])
+                cells[2].text = str(item[2])
+                cells[3].text = str(item[3])
+                cells[4].text = str(item[4])
+                cells[5].text = str(item[5]) + ' DH'
+                # cells[6].text = str(item[6])
+
+            table.style = 'LightShading-Accent1'
+            # fff =file_name + '.docx'
+            #TODO 
+            doc.save(file_name)
+            print(file_name + ' : saved successfully')
+            # os.system(fff)
+            # print(fff.split('/')[-1])
+
+
+        file_name,_ = QFileDialog.getSaveFileName(self, caption = 'حفظ في :', directory = '.', filter = "text files (*.doc *.docx)")
+        if file_name :
+            curs.execute('SELECT * FROM selles_history')
+            ii = curs.fetchall()
+            print(file_name)
+            
+            # print(len(file_name.split('/')[-1].split('.')))
+            
+            if len(file_name.split('/')[-1].split('.')) == 2:
+                if file_name.split('/')[-1].split('.')[1] == 'doc' or  file_name.split('/')[-1].split('.')[1] == 'docx':
+                    # print('extention : doc or docx')#TODO header & footer
+                    fill_doc(file_name, ii, header_, footer_)
+                    QApplication.processEvents()
+                else:
+                    self.err = QtWidgets.QErrorMessage()
+                    self.err.showMessage('صيغة الملف غير مقبولة')
+                    self.err.setWindowTitle('خطأ')
+                    
+            else:
+                print(' no extention')
+                file_ = file_name + '.docx'
+                fill_doc(file_, ii, header_, footer_)
+                QApplication.processEvents()
+        else:
+            print('printing canceled')
+
 
     def back_home(self):
         self.close()
@@ -182,11 +270,13 @@ class Buyes_history(QWidget, history_win_dir):#DONE
         self.setWindowTitle('سجل المشتريات')
         self.refresh_()
         self.back_from_history.clicked.connect(self.back_home)
-        self.print_history.clicked.connect(self.print_buyes_history)
+        self.print_history.clicked.connect(self.pprint)
 
 
-    def print_buyes_history(self):#TODO : Print buying history table
-        print('Print buying history ')
+
+    def pprint(self):#TODO PRINT data 
+        pass
+
 
     def back_home(self):
         self.close()
@@ -541,11 +631,14 @@ class C_kridi_fix_history(QWidget, fix_kridi_history_win_dir):
         self.setWindowTitle('سجل القروض المدفوعة')
         self.refresh_()
         self.back_btn.clicked.connect(self.back__)
-        self.print_btn.clicked.connect(self.print_)
+        self.print_btn.clicked.connect(self.pprint)
 
 
-    def print_(self):##~ TODO ~~PRINT fucking DATA 
+
+    def pprint(self):#TODO PRINT data 
         pass
+
+
 
     def back__(self):
         self.close()
@@ -656,10 +749,12 @@ class S_kridi_fix_history(QWidget, fix_kridi_history_win_dir):
         self.setWindowTitle('القروض المستخلصة')
         self.refresh_()
         self.back_btn.clicked.connect(self.back__)
-        self.print_btn.clicked.connect(self.print_)
+        self.print_btn.clicked.connect(self.pprint)
 
 
-    def print_(self):##~ TODO ~~PRINT fucking DATA 
+
+
+    def pprint(self):#TODO PRINT data 
         pass
 
     def back__(self):
@@ -786,77 +881,8 @@ class C_kridi_history(QWidget, kridi_history_win_dir):
             for c_n, d in enumerate(r_d):
                 self.kridi_history_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
-#TODO here i am 
-    def pprint(self, location):#TODO PRINT data 
-        file_name,_ = QFileDialog.getSaveFileName(self, caption = 'حفظ في :', directory = '.', filter = "text files (*.doc *.docx)")
-        if file_name :
-            curs.execute('SELECT * FROM C_kridi_history')
-            ii = curs.fetchall()
-            print(file_name)
-            
-            # print(len(file_name.split('/')[-1].split('.')))
-            
-            if len(file_name.split('/')[-1].split('.')) == 2:
-                if file_name.split('/')[-1].split('.')[1] == 'doc' or  file_name.split('/')[-1].split('.')[1] == 'docx':
-                    # print('extention : doc or docx')
-                    self.fill_doc(file_name, ii, '\theader', '\tfooter')
-                    QApplication.processEvents()
-                else:
-                    self.err = QtWidgets.QErrorMessage()
-                    self.err.showMessage('صيغة الملف غير مقبولة')
-                    self.err.setWindowTitle('خطأ')
-                    
-            else:
-                print(' no extention')
-                file_ = file_name + '.docx'
-                self.fill_doc(file_, ii, '\theader', '\tfooter')
-                QApplication.processEvents()
-        else:
-            print('printing canceled')
-        
-    def fill_doc(self, file_name, data, h = '', f = ''):
-        from docx.shared import Inches
-        doc = Document()
-        # doc.add_heading('test heading')
-        section = doc.sections[0]
-        heade = section.header
-        paragraph = heade.paragraphs[0]
-        paragraph.text = h
-
-        footer = section.footer
-        footer.paragraphs[0].text = f
-        # for i in curs.fetchall():
-        #     ii.appe   nd(i)
-        # add table ------------------
-        table = doc.add_table(1, 7)
-        # populate header row --------
-        heading_cells = table.rows[0].cells
-        heading_cells[0].text = 'ID'
-        heading_cells[1].text = 'date'
-        heading_cells[2].text = 'name'
-        heading_cells[3].text = 'article'
-        heading_cells[4].text = 'qt'
-        heading_cells[5].text = 'total'
-        heading_cells[6].text = 'pay_date'
-        # add a data row for each item
-        for item in data:
-            cells = table.add_row().cells
-            cells[0].text = str(item[0])
-            cells[1].text = item[1]
-            cells[2].text = item[2]
-            cells[3].text = item[3]
-            cells[4].text = str(item[4])
-            cells[5].text = str(item[5])
-            cells[6].text = str(item[6])
-
-        table.style = 'LightShading-Accent1'
-        # fff =file_name + '.docx'
-        #TODO 
-        doc.save(file_name)
-        print(file_name + ' : saved successfully')
-        # os.system(fff)
-        # print(fff.split('/')[-1])
-
+    def pprint(self):#TODO PRINT data 
+        pass
 
     def bback(self):
         self.close()
@@ -887,8 +913,11 @@ class S_kridi_history(QWidget, kridi_history_win_dir):
                 self.kridi_history_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
 
+
+
     def pprint(self):#TODO PRINT data 
         pass
+
 
     def bback(self):
         self.close()
@@ -1143,6 +1172,7 @@ class Home(QWidget, home_win_dir):# almost...
         self.searsh_seller_EditText.textChanged.connect(self.searsh_sellers)
         self.searsh_art.textChanged.connect(self.searsh_articles)
         self.setting_Button.clicked.connect(self.settt)
+        self.print_sellers_info.clicked.connect(self.print_s_info)
 
 
     def searsh_articles(self):
@@ -1249,11 +1279,14 @@ class Home(QWidget, home_win_dir):# almost...
                 for c_n, d in enumerate(r_d):
                     self.clients_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
+
+    #TODO PRINT 
+    def print_s_info(self):
+        pass
+
+
     #TODO PRINT 
     def print_c_info(self):
-        # dialog = QtPrintSupport.QPrintPreviewDialog()
-        # dialog.paintRequested.connect(self.printDocument)
-        # dialog.exec_()
         pass
 
    
