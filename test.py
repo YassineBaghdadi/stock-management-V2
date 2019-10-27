@@ -2,10 +2,10 @@
 # from docx.enum.table import WD_TABLE_ALIGNMENT
 # from docx.enum.section import WD_ORIENT, WD_SECTION
 # doc = Document()
-# import sqlite3
+import sqlite3
 
-# conn = sqlite3.connect('src/db.db')
-# curs = conn.cursor()
+conn = sqlite3.connect('src/db.db')
+curs = conn.cursor()
 
 # # # ####################################################################
 # # # import random
@@ -206,6 +206,45 @@
 # for i, u in range(10), range(10,1):
 #     print(i + ' + ' + u)
 
-d = "hello word"
-print(d)
-print(str(d))
+# d = "hello word"
+# print(d)
+# print(str(d))
+
+# simple_table.py
+ 
+from fpdf import FPDF
+ 
+def pdf__(spacing=1):
+    curs.execute('SELECT * FROM C_kridi_history')
+
+    data = curs.fetchall()
+    table_head = ['ID', 'date', 'name', 'art', 'qt', 'total', 'pay_date']
+    data.insert(0, table_head)
+ 
+    pdf = FPDF()
+    pdf.set_font("Arial", size=10)
+    pdf.add_page()
+    # #  # Add an address
+    pdf.cell(100)
+    pdf.cell(0, 5, 'Mike Driscoll', ln=1)
+    pdf.cell(100)
+    pdf.cell(0, 5, '123 American Way', ln=1)
+    pdf.cell(100)
+    pdf.cell(0, 5, 'Any Town, USA', ln=1)
+    
+    # #     # # Line break
+    pdf.ln(20)
+    
+
+    col_width = pdf.w / (len(table_head) + 0.5)
+    row_height = pdf.font_size
+    for row in data:
+        for item in row:
+            pdf.cell(col_width, row_height*spacing,txt=str(item), border=1, align='C')
+        pdf.ln(row_height*spacing)
+
+ 
+    pdf.output('src/simple_table.pdf')
+ 
+if __name__ == '__main__':
+    pdf__()
