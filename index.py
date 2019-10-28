@@ -148,6 +148,57 @@ class FirstOpen(QMainWindow, first_open_win_dir):# done
                     self.home_wn.show()
                     self.close()
 
+
+class Print_pdf:
+    def __init__(self, file_name, table = '', spacing = 1):
+        ypdf = FPDF(format='letter')
+        ypdf.set_font("Arial", size=10)
+        ypdf.add_page()
+        # #  # Add an address
+        ypdf.cell(100)
+        ypdf.cell(0, 5, 'Mike Driscoll', ln=1)
+        ypdf.cell(100)
+        ypdf.cell(0, 5, '123 American Way', ln=1)
+        ypdf.cell(100)
+        ypdf.cell(0, 5, 'Any Town, USA', ln=1)
+
+        # #     # # Line break
+        ypdf.ln(20)
+        curs.execute('SELECT * FROM "{}"'.format(table))
+        data = curs.fetchall()
+        table_head = ['ID', 'date', 'name', 'art', 'qt', 'total', 'pay_date', 'test']
+        data.insert(0, table_head)
+
+        col_width = ypdf.w / (len(table_head) + 0.5)
+        row_height = ypdf.font_size
+        for row in data:
+            for item in row:
+                ypdf.cell(col_width, row_height * spacing, txt=str(item), border=1, align='C')
+            ypdf.ln(row_height * spacing)
+
+
+        # !TODO fix this
+
+        if len(file_name.split('/')[-1].split('.')) == 2:
+            if str(file_name.split('/')[-1].split('.')[1]) == 'pdf' :
+                print('file name : ', file_name)
+                ypdf.output(file_name)
+                # self.mk_pdf(self.file_name)
+                # pdf.output('/mnt/AC72F2C272F29076/works/stock/stock-management-V2/src/uuuuuuuuuu.pdf')
+
+            else:
+                self.err = QtWidgets.QErrorMessage()
+                self.err.showMessage('صيغة الملف غير مقبولة')
+                self.err.setWindowTitle('خطأ')
+
+        else:
+            print(' no extention')
+            file_ = str(file_name) + '.pdf'
+            print('file name : ', file_)
+            ypdf.output(file_)
+
+
+
 class Selles_history(QWidget, history_win_dir):#DONE
     def __init__(self, parent = None):
         super(Selles_history, self).__init__(parent)
@@ -162,148 +213,100 @@ class Selles_history(QWidget, history_win_dir):#DONE
 
 
     #? for word 
-    # def pprint(self, location):#TODO PRINT data 
-    #     def fill_doc( file_name, data, h = '', f = ''):
-    #         from docx.shared import Inches
-    #         doc = Document()
-    #         # doc.add_heading('test heading')
-    #         section = doc.sections[0]
-    #         heade = section.header
-    #         paragraph = heade.paragraphs[0]
-    #         paragraph.text = h
+#     """
+#     def pprint(self, location):#TODO PRINT data 
+#         def fill_doc( file_name, data, h = '', f = ''):
+#             from docx.shared import Inches
+#             doc = Document()
+#             # doc.add_heading('test heading')
+#             section = doc.sections[0]
+#             heade = section.header
+#             paragraph = heade.paragraphs[0]
+#             paragraph.text = h
+#             footer = section.footer
+#             footer.paragraphs[0].text = f
+#             # for i in curs.fetchall():
+#             #     ii.appe   nd(i)
+#             # add table ------------------
+#             curs.execute('SELECT ID, date, name, article, qt, total FROM selles_history ORDER BY ID DESC')
+#             statu_ = curs.fetchall()
+#             table = doc.add_table(1, 6)
+#             # current_section = doc.sections[-1]
+#             # new_width, new_height = current_section.page_height, current_section.page_width
+#             # new_section = doc.add_section(WD_SECTION.NEW_PAGE)
+#             # new_section.orientation = WD_ORIENT.LANDSCAPE
+#             # new_section.page_width = new_width
+#             # new_section.page_height = new_height
+#             # populate header row --------
+#             heading_cells = table.rows[0].cells
+#             header_titles =['رقم الزبون','تاريخ العملية', 'الإسم', 'السلعة', 'الكمية', 'المجموع']
+#             # heading_cells[0].text = 'ID'
+#             # heading_cells[1].text = 'date'
+#             # heading_cells[2].text = 'name'
+#             # heading_cells[3].text = 'article'
+#             # heading_cells[4].text = 'qt'
+#             # heading_cells[5].text = 'total'
+#             # heading_cells[6].text = 'pay_date'
+#             for i in range(6):
+#                 heading_cells[i].text = header_titles[i]
 
-    #         footer = section.footer
-    #         footer.paragraphs[0].text = f
-    #         # for i in curs.fetchall():
-    #         #     ii.appe   nd(i)
-    #         # add table ------------------
-    #         curs.execute('SELECT ID, date, name, article, qt, total FROM selles_history ORDER BY ID DESC')
-    #         statu_ = curs.fetchall()
-    #         table = doc.add_table(1, 6)
-    #         # current_section = doc.sections[-1]
-    #         # new_width, new_height = current_section.page_height, current_section.page_width
-    #         # new_section = doc.add_section(WD_SECTION.NEW_PAGE)
-    #         # new_section.orientation = WD_ORIENT.LANDSCAPE
-    #         # new_section.page_width = new_width
-    #         # new_section.page_height = new_height
-    #         # populate header row --------
-    #         heading_cells = table.rows[0].cells
-    #         header_titles =['رقم الزبون','تاريخ العملية', 'الإسم', 'السلعة', 'الكمية', 'المجموع']
-    #         # heading_cells[0].text = 'ID'
-    #         # heading_cells[1].text = 'date'
-    #         # heading_cells[2].text = 'name'
-    #         # heading_cells[3].text = 'article'
-    #         # heading_cells[4].text = 'qt'
-    #         # heading_cells[5].text = 'total'
-    #         # heading_cells[6].text = 'pay_date'
-    #         for i in range(6):
-    #             heading_cells[i].text = header_titles[i]
-
-    #         # add a data row for each item
-    #         for item in data:
-    #             cells = table.add_row().cells
-    #             cells[0].text = str(item[0])
-    #             cells[1].text = str(item[1])
-    #             cells[2].text = str(item[2])
-    #             cells[3].text = str(item[3])
-    #             cells[4].text = str(item[4])
-    #             cells[5].text = str(item[5]) + ' DH'
-    #             # cells[6].text = str(item[6])
-
-    #         table.style = 'LightShading-Accent1'
-    #         # fff =file_name + '.docx'
-    #         #TODO 
-    #         doc.save(file_name)
-    #         print(file_name + ' : saved successfully')
-            
-    #         os.chmod(file_name, S_IREAD)
-    #         print(file_name + ' : changed to read only')
-    #         # os.system(fff)
-    #         # print(fff.split('/')[-1])
-    #     file_name,_ = QFileDialog.getSaveFileName(self, caption = 'حفظ في :', directory = '.', filter = "text files (*.doc *.docx)")
-    #     if file_name :
-    #         curs.execute('SELECT * FROM selles_history')
-    #         ii = curs.fetchall()
-    #         print(file_name)
-            
-    #         # print(len(file_name.split('/')[-1].split('.')))
-            
-    #         if len(file_name.split('/')[-1].split('.')) == 2:
-    #             if file_name.split('/')[-1].split('.')[1] == 'doc' or  file_name.split('/')[-1].split('.')[1] == 'docx':
-    #                 # print('extention : doc or docx')#TODO header & footer
-    #                 fill_doc(file_name, ii, header_, footer_)
-    #                 QApplication.processEvents()
-    #             else:
-    #                 self.err = QtWidgets.QErrorMessage()
-    #                 self.err.showMessage('صيغة الملف غير مقبولة')
-    #                 self.err.setWindowTitle('خطأ')
-                    
-    #         else:
-    #             print(' no extention')
-    #             file_ = file_name + '.docx'
-    #             fill_doc(file_, ii, header_, footer_)
-    #             QApplication.processEvents()
-    #     else:
-    #         print('printing canceled')
-
+#             # add a data row for each item
+#             for item in data:
+#                 cells = table.add_row().cells
+#                 cells[0].text = str(item[0])
+#                 cells[1].text = str(item[1])
+#                 cells[2].text = str(item[2])
+#                 cells[3].text = str(item[3])
+#                 cells[4].text = str(item[4])
+#                 cells[5].text = str(item[5]) + ' DH'
+#                 # cells[6].text = str(item[6])
+    
+#             table.style = 'LightShading-Accent1'
+#             # fff =file_name + '.docx'
+#             #TODO 
+#             doc.save(file_name)
+#             print(file_name + ' : saved successfully')
+#             os.chmod(file_name, S_IREAD)
+#             print(file_name + ' : changed to read only')
+#             # os.system(fff)
+#             # print(fff.split('/')[-1])
+#         file_name,_ = QFileDialog.getSaveFileName(self, caption = 'حفظ في :', directory = '.', filter = "text files (*.doc *.docx)")
+#         if file_name :
+#             curs.execute('SELECT * FROM selles_history')
+#             ii = curs.fetchall()
+#             print(file_name)
+        
+#             # print(len(file_name.split('/')[-1].split('.')))
+    
+#             if len(file_name.split('/')[-1].split('.')) == 2:
+#                 if file_name.split('/')[-1].split('.')[1] == 'doc' or  file_name.split('/')[-1].split('.')[1] == 'docx':
+#                     # print('extention : doc or docx')#TODO header & footer
+#                     fill_doc(file_name, ii, header_, footer_)
+#                     QApplication.processEvents()
+#                 else:
+#                     self.err = QtWidgets.QErrorMessage()
+#                     self.err.showMessage('صيغة الملف غير مقبولة')
+#                     self.err.setWindowTitle('خطأ')
+              
+#             else:
+#                 print(' no extention')
+#                 file_ = file_name + '.docx'
+#                 fill_doc(file_, ii, header_, footer_)
+#                 QApplication.processEvents()
+#         else:
+#             print('printing canceled')
+# """
 #? for pdf 
 
-    def pprint(self, location, spacing = 1):#TODO PRINT data 
-    
-        file_name,_ = QFileDialog.getSaveFileName(self, caption = 'حفظ في :', directory = '.', filter = "text files (*.pdf)")
-        if file_name :
-            curs.execute('SELECT * FROM selles_history')
-            data = curs.fetchall()
-            #table_head = ['ID', 'date', 'name', 'art', 'qt', 'total', 'pay_date']
-            table_head = ['رقم الزبون','تاريخ العملية', 'الإسم', 'السلعة', 'الكمية', 'المجموع']
-            data.insert(0, table_head)
-        
-            pdf = FPDF()
-            pdf.set_font("Arial", size=10)
-            pdf.add_page()
-            # #  # Add an address
-            pdf.cell(100)
-            pdf.cell(0, 5, header_, ln=1)
-            
-            
-            # #     # # Line break
-            pdf.ln(20)
-            
+    def pprint(self, spacing = 1):#TODO PRINT data
 
-            col_width = pdf.w / (len(table_head) + 0.5)
-            row_height = pdf.font_size
+        file_name, _ = QFileDialog.getSaveFileName(self, caption='حفظ في :', directory='.', filter="text files (*.pdf)")
+        if file_name:
+            print_pdf = Print_pdf(file_name, 'selles_history')
 
-            #pdf.output('/mnt/AC72F2C272F29076/works/stock/stock-management-V2/src/yyyyyyyyyyy.pdf')
 
-            for row in data:
-                for item in row:
-                    pdf.cell(col_width, row_height*spacing,txt=str(item), border=1, align='C')
-                pdf.ln(row_height*spacing)
-                
-                    #!TODO fix this
-            if len(file_name.split('/')[-1].split('.')) == 2:
-                if file_name.split('/')[-1].split('.')[1] == 'pdf' :
-                    
-                    print('file name : ', file_name)
-                    #pdf.output(file_name)
-                    pdf.output('/mnt/AC72F2C272F29076/works/stock/stock-management-V2/src/uuuuuuuuuu.pdf')
-                else:
-                    self.err = QtWidgets.QErrorMessage()
-                    self.err.showMessage('صيغة الملف غير مقبولة')
-                    self.err.setWindowTitle('خطأ')
-                    
-            else:
-                print(' no extention')
-                file_ = file_name + '.pdf'
-                print('file name : ', file_)
-                #pdf.output(file_)
         else:
             print('printing canceled')
-
-
-
-
-
 
     def back_home(self):
         self.close()

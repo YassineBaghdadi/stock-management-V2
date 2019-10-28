@@ -215,7 +215,7 @@ curs = conn.cursor()
 from fpdf import FPDF
  
 def pdf__(spacing=1):
-    curs.execute('SELECT * FROM C_kridi_history')
+    curs.execute('SELECT * FROM selles_history')
 
     data = curs.fetchall()
     table_head = ['ID', 'date', 'name', 'art', 'qt', 'total', 'pay_date']
@@ -242,9 +242,32 @@ def pdf__(spacing=1):
         for item in row:
             pdf.cell(col_width, row_height*spacing,txt=str(item), border=1, align='C')
         pdf.ln(row_height*spacing)
-
  
-    pdf.output('src/simple_table.pdf')
+    pdf.output('../Desktop/tttt.pdf')
  
 if __name__ == '__main__':
     pdf__()
+
+# curs.execute('SELECT * FROM selles_history')
+# data = curs.fetchall()
+# #table_head = ['ID', 'date', 'name', 'art', 'qt', 'total', 'pay_date']
+# table_head = ['رقم الزبون','تاريخ العملية', 'الإسم', 'السلعة', 'الكمية', 'المجموع']
+# data.insert(0, table_head)
+# pdf = FPDF()
+# pdf.set_font("Arial", size=11)
+# pdf.add_page()
+# # #  # Add an address
+# # pdf.cell(100)
+# # pdf.cell(0, 5, header_, ln=1)
+# # # #     # # Line break
+# # pdf.ln(20)
+# col_width = pdf.w / (len(table_head) + 0.5)
+# row_height = pdf.font_size
+
+# #
+
+# for row in data:
+#     for item in row:
+#         pdf.cell(col_width, row_height*1,txt=str(item), border=1, align='C')
+#     pdf.ln(row_height*1)
+# pdf.output('/mnt/AC72F2C272F29076/works/stock/stock-management-V2/src/y.pdf')
