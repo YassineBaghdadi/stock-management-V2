@@ -5,7 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5.uic import *
 from docx import *
 from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.section import WD_ORIENT, WD_SECTION
+# from docx.enum.section import WD_ORIENT, WD_SECTION
 
 import os
 from os import path
