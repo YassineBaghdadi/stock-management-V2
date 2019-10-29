@@ -150,9 +150,11 @@ class FirstOpen(QMainWindow, first_open_win_dir):# done
 
 
 class Print_pdf:
-    def __init__(self, file_name, table = '', spacing = 1):
-        ypdf = FPDF(format='letter')
-        ypdf.set_font("Arial", size=10)
+    def __init__(self, file_name, table_head, table = '', spacing = 1):
+        ypdf = FPDF()
+        ypdf.add_font('DejaVu', '', 'src/DejaVuSansCondensed.ttf', uni=True)
+        ypdf.set_font('DejaVu', '', 11)
+        # ypdf.set_font("Arial", size=10)
         ypdf.add_page()
         # #  # Add an address
         ypdf.cell(100)
@@ -166,7 +168,7 @@ class Print_pdf:
         ypdf.ln(20)
         curs.execute('SELECT * FROM "{}"'.format(table))
         data = curs.fetchall()
-        table_head = ['ID', 'date', 'name', 'art', 'qt', 'total', 'pay_date', 'test']
+
         data.insert(0, table_head)
 
         col_width = ypdf.w / (len(table_head) + 0.5)
@@ -182,7 +184,7 @@ class Print_pdf:
         if len(file_name.split('/')[-1].split('.')) == 2:
             if str(file_name.split('/')[-1].split('.')[1]) == 'pdf' :
                 print('file name : ', file_name)
-                ypdf.output(file_name)
+                ypdf.output(file_name, 'F')
                 # self.mk_pdf(self.file_name)
                 # pdf.output('/mnt/AC72F2C272F29076/works/stock/stock-management-V2/src/uuuuuuuuuu.pdf')
 
@@ -195,9 +197,7 @@ class Print_pdf:
             print(' no extention')
             file_ = str(file_name) + '.pdf'
             print('file name : ', file_)
-            ypdf.output(file_)
-
-
+            ypdf.output(file_, 'F')
 
 class Selles_history(QWidget, history_win_dir):#DONE
     def __init__(self, parent = None):
@@ -299,10 +299,9 @@ class Selles_history(QWidget, history_win_dir):#DONE
 #? for pdf 
 
     def pprint(self, spacing = 1):#TODO PRINT data
-
         file_name, _ = QFileDialog.getSaveFileName(self, caption='حفظ في :', directory='.', filter="text files (*.pdf)")
         if file_name:
-            print_pdf = Print_pdf(file_name, 'selles_history')
+            print_pdf = Print_pdf(file_name, ['ID', 'date', 'name', 'art', 'qt', 'total', 'pay_date', 'test'], 'selles_history')
 
 
         else:
@@ -336,7 +335,7 @@ class Buyes_history(QWidget, history_win_dir):#DONE
         self.print_history.clicked.connect(self.pprint)
 
 
-
+#TODO : here we are again
     def pprint(self):#TODO PRINT data 
         pass
 

@@ -213,40 +213,40 @@ curs = conn.cursor()
 # simple_table.py
  
 from fpdf import FPDF
- 
-def pdf__(spacing=1):
-    curs.execute('SELECT * FROM selles_history')
-
-    data = curs.fetchall()
-    table_head = ['ID', 'date', 'name', 'art', 'qt', 'total', 'pay_date']
-    data.insert(0, table_head)
- 
-    pdf = FPDF()
-    pdf.set_font("Arial", size=10)
-    pdf.add_page()
-    # #  # Add an address
-    pdf.cell(100)
-    pdf.cell(0, 5, 'Mike Driscoll', ln=1)
-    pdf.cell(100)
-    pdf.cell(0, 5, '123 American Way', ln=1)
-    pdf.cell(100)
-    pdf.cell(0, 5, 'Any Town, USA', ln=1)
-    
-    # #     # # Line break
-    pdf.ln(20)
-    
-
-    col_width = pdf.w / (len(table_head) + 0.5)
-    row_height = pdf.font_size
-    for row in data:
-        for item in row:
-            pdf.cell(col_width, row_height*spacing,txt=str(item), border=1, align='C')
-        pdf.ln(row_height*spacing)
- 
-    pdf.output('../Desktop/tttt.pdf')
- 
-if __name__ == '__main__':
-    pdf__()
+#
+# def pdf__(spacing=1):
+#     curs.execute('SELECT * FROM selles_history')
+#
+#     data = curs.fetchall()
+#     table_head = ['ID', 'date', 'name', 'art', 'qt', 'total', 'pay_date']
+#     data.insert(0, table_head)
+#
+#     pdf = FPDF()
+#     pdf.set_font("Arial", size=10)
+#     pdf.add_page()
+#     # #  # Add an address
+#     pdf.cell(100)
+#     pdf.cell(0, 5, 'Mike Driscoll', ln=1)
+#     pdf.cell(100)
+#     pdf.cell(0, 5, '123 American Way', ln=1)
+#     pdf.cell(100)
+#     pdf.cell(0, 5, 'Any Town, USA', ln=1)
+#
+#     # #     # # Line break
+#     pdf.ln(20)
+#
+#
+#     col_width = pdf.w / (len(table_head) + 0.5)
+#     row_height = pdf.font_size
+#     for row in data:
+#         for item in row:
+#             pdf.cell(col_width, row_height*spacing,txt=str(item), border=1, align='C')
+#         pdf.ln(row_height*spacing)
+#
+#     pdf.output('../Desktop/tttt.pdf')
+#
+# if __name__ == '__main__':
+#     pdf__()
 
 # curs.execute('SELECT * FROM selles_history')
 # data = curs.fetchall()
@@ -271,3 +271,32 @@ if __name__ == '__main__':
 #         pdf.cell(col_width, row_height*1,txt=str(item), border=1, align='C')
 #     pdf.ln(row_height*1)
 # pdf.output('/mnt/AC72F2C272F29076/works/stock/stock-management-V2/src/y.pdf')
+
+
+from fpdf import FPDF
+
+pdf = FPDF()
+pdf.add_page()
+
+# Add a DejaVu Unicode font (uses UTF-8)
+# Supports more than 200 languages. For a coverage status see:
+# http://dejavu.svn.sourceforge.net/viewvc/dejavu/trunk/dejavu-fonts/langcover.txt
+pdf.add_font('DejaVu', '', 'src/DejaVuSansCondensed.ttf', uni=True)
+pdf.set_font('DejaVu', '', 14)
+
+text = u"""
+English: Hello World
+Greek: Γειά σου κόσμος
+Polish: Witaj świecie
+Portuguese: Olá mundo
+Russian: Здравствуй, Мир
+Vietnamese: Xin chào thế giới
+Arabic: مرحبا العالم
+Hebrew: שלום עולם
+"""
+
+for txt in text.split('\n'):
+    pdf.write(8, txt)
+    pdf.ln(8)
+
+pdf.output('src/rrrr.pdf')
