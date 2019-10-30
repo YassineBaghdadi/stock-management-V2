@@ -179,8 +179,6 @@ class Print_pdf:
             ypdf.ln(row_height * spacing)
 
 
-        # !TODO fix this
-
         if len(file_name.split('/')[-1].split('.')) == 2:
             if str(file_name.split('/')[-1].split('.')[1]) == 'pdf' :
                 print('file name : ', file_name)
@@ -263,7 +261,6 @@ class Selles_history(QWidget, history_win_dir):#DONE
     
 #             table.style = 'LightShading-Accent1'
 #             # fff =file_name + '.docx'
-#             #TODO 
 #             doc.save(file_name)
 #             print(file_name + ' : saved successfully')
 #             os.chmod(file_name, S_IREAD)
@@ -301,7 +298,7 @@ class Selles_history(QWidget, history_win_dir):#DONE
     def pprint(self, spacing = 1):#TODO PRINT data
         file_name, _ = QFileDialog.getSaveFileName(self, caption='حفظ في :', directory='.', filter="text files (*.pdf)")
         if file_name:
-            print_pdf = Print_pdf(file_name, ['ID', 'date', 'name', 'art', 'qt', 'total', 'pay_date', 'test'], 'selles_history')
+            print_pdf = Print_pdf(file_name, ['ID', 'operation date', 'client', 'article', 'quantity', 'total', 'rest', 'pay date'], 'selles_history')
 
 
         else:
@@ -335,10 +332,15 @@ class Buyes_history(QWidget, history_win_dir):#DONE
         self.print_history.clicked.connect(self.pprint)
 
 
-#TODO : here we are again
     def pprint(self):#TODO PRINT data 
-        pass
+        file_name, _ = QFileDialog.getSaveFileName(self, caption='حفظ في :', directory='.', filter="text files (*.pdf)")
+        if file_name:
+            print_pdf = Print_pdf(file_name, ['ID', 'operation date', 'seller', 'article', 'quantity', 'total', 'rest',
+                                              'pay date'], 'buys_history')
 
+
+        else:
+            print('printing canceled')
 
     def back_home(self):
         self.close()
@@ -398,7 +400,6 @@ class ADD_new_client(QWidget, add_new_pea_win_dir):#DONE
                                                                                                    self.L_name.text()))
                 self.current = []
                 for oo in current_info.fetchall():
-                    print('00 = {}'.format(oo))
                     self.current.append(oo[0])
                     self.current.append(oo[1])
                     self.current.append(oo[2])
@@ -561,8 +562,8 @@ class ADD_new_art(QWidget, add_new_art_win_dir):# DONE
                 
                 for oo in curs.fetchone():
                     self.current.append(oo)
-                    
-                print(self.current)
+
+
                 
                 self.err = QtWidgets.QErrorMessage()
                 self.err.showMessage('" {} " هي موجودة بالفعل في قاعدة البيانات و كميتها الحالية : "{}" و ثمنها : {} درهم'
@@ -698,9 +699,13 @@ class C_kridi_fix_history(QWidget, fix_kridi_history_win_dir):
 
 
     def pprint(self):#TODO PRINT data 
-        pass
+        file_name, _ = QFileDialog.getSaveFileName(self, caption='حفظ في :', directory='.', filter="text files (*.pdf)")
+        if file_name:
+            print_pdf = Print_pdf(file_name, ['ID', 'operation date', 'name', 'total', 'rest'], 'fix_C_kridi_history')
 
 
+        else:
+            print('printing canceled')
 
     def back__(self):
         self.close()
@@ -799,7 +804,7 @@ class C_kridi_fix(QWidget, fix_kridi_win_dir):# DONE
             curs.execute('INSERT INTO fix_C_kridi_history (date, name, payed_money, rest) VALUES ("{}", "{}", {}, {})'
                     .format(str(today), self.fix_kridi_combo.currentText(), self.fix_kridi_editeLine.text(), curs.fetchone()[0]))
             conn.commit()
-        except ERROR as er:
+        except Exception as er:
             print(er)
             
 class S_kridi_fix_history(QWidget, fix_kridi_history_win_dir):
@@ -817,7 +822,13 @@ class S_kridi_fix_history(QWidget, fix_kridi_history_win_dir):
 
 
     def pprint(self):#TODO PRINT data 
-        pass
+        file_name, _ = QFileDialog.getSaveFileName(self, caption='حفظ في :', directory='.', filter="text files (*.pdf)")
+        if file_name:
+            print_pdf = Print_pdf(file_name, ['ID', 'operation date', 'name', 'total', 'rest'], 'fix_S_kridi_history')
+
+
+        else:
+            print('printing canceled')
 
     def back__(self):
         self.close()
@@ -917,7 +928,7 @@ class S_kridi_fix(QWidget, fix_kridi_win_dir):
             curs.execute('INSERT INTO fix_S_kridi_history (date, name, payed_money, rest) VALUES ("{}", "{}", {}, {})'
                     .format(str(today), self.fix_kridi_combo.currentText(), self.fix_kridi_editeLine.text(), curs.fetchone()[0]))
             conn.commit()
-        except ERROR as er:
+        except Exception as er:
             print(er)      
  
 class C_kridi_history(QWidget, kridi_history_win_dir):
@@ -944,7 +955,13 @@ class C_kridi_history(QWidget, kridi_history_win_dir):
                 self.kridi_history_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
     def pprint(self):#TODO PRINT data 
-        pass
+        file_name, _ = QFileDialog.getSaveFileName(self, caption='حفظ في :', directory='.', filter="text files (*.pdf)")
+        if file_name:
+            print_pdf = Print_pdf(file_name, ['ID', 'operation date', 'client', 'article', 'quantity', 'total', 'pay date'], 'C_kridi_history')
+
+
+        else:
+            print('printing canceled')
 
     def bback(self):
         self.close()
@@ -978,8 +995,15 @@ class S_kridi_history(QWidget, kridi_history_win_dir):
 
 
     def pprint(self):#TODO PRINT data 
-        pass
+        file_name, _ = QFileDialog.getSaveFileName(self, caption='حفظ في :', directory='.', filter="text files (*.pdf)")
+        if file_name:
+            print_pdf = Print_pdf(file_name,
+                                  ['ID', 'operation date', 'seller', 'article', 'quantity', 'total', 'pay date'],
+                                  'S_kridi_history')
 
+
+        else:
+            print('printing canceled')
 
     def bback(self):
         self.close()
@@ -1235,6 +1259,7 @@ class Home(QWidget, home_win_dir):# almost...
         self.searsh_art.textChanged.connect(self.searsh_articles)
         self.setting_Button.clicked.connect(self.settt)
         self.print_sellers_info.clicked.connect(self.print_s_info)
+        self.print_art.clicked.connect(self.print_art_info)
 
 
     def searsh_articles(self):
@@ -1344,14 +1369,40 @@ class Home(QWidget, home_win_dir):# almost...
 
     #TODO PRINT 
     def print_s_info(self):
-        pass
+        file_name, _ = QFileDialog.getSaveFileName(self, caption='حفظ في :', directory='.', filter="text files (*.pdf)")
+        if file_name:
+            print_pdf = Print_pdf(file_name,
+                                  ['ID', 'first name', 'last name', 'cne', 'tebted money', 'recived money', 'rest',
+                                   'pay date'],
+                                  'sellers')
 
 
-    #TODO PRINT 
+        else:
+            print('printing canceled')
+
+    #TODO PRINT
     def print_c_info(self):
-        pass
+        file_name, _ = QFileDialog.getSaveFileName(self, caption='حفظ في :', directory='.', filter="text files (*.pdf)")
+        if file_name:
+            print_pdf = Print_pdf(file_name,
+                                  ['ID', 'name', 'type', 'quantity', 'price', 'note'],
+                                  'clients')
 
-   
+
+        else:
+            print('printing canceled')
+    #TODO PRINT
+    def print_art_info(self):
+        file_name, _ = QFileDialog.getSaveFileName(self, caption='حفظ في :', directory='.', filter="text files (*.pdf)")
+        if file_name:
+            print_pdf = Print_pdf(file_name,
+                                  ['ID', 'first name', 'last name', 'cne', 'tebted money', 'recived money', 'rest', 'pay date'],
+                                  'articles')
+
+
+        else:
+            print('printing canceled')
+
     def c_k_history(self):
         self.c_k_h = C_kridi_history()
         self.c_k_h.show()
@@ -1433,12 +1484,83 @@ class Home(QWidget, home_win_dir):# almost...
             self.log_out = VirificationAlert()
             self.log_out.show()
         else:
+            conn.close()
             self.exit()
 
     def refresh_data(self):  # refresh all app data
         self.refresh_labels()
         self.refresh_tables()
         self.fill_combos()
+        curs.execute('SELECT COUNT(ID) FROM selles_history')
+        if curs.fetchone()[0] == 0:
+            self.sell_history_Button.setEnabled(False)
+        else:
+            self.sell_history_Button.setEnabled(True)
+
+        curs.execute('SELECT COUNT(ID) FROM articles')
+        if curs.fetchone()[0] == 0:
+            self.buy_exists_article.setEnabled(False)
+        else:
+            self.buy_exists_article.setEnabled(True)
+
+        curs.execute('SELECT COUNT(ID) FROM buys_history')
+        if curs.fetchone()[0] == 0:
+            self.buy_and_buy_history_Button.setEnabled(False)
+        else:
+            self.buy_and_buy_history_Button.setEnabled(True)
+
+
+        curs.execute('SELECT COUNT(ID) FROM C_kridi')
+        if curs.fetchone()[0] == 0:
+            self.C_kridi_history_btn.setEnabled(False)
+        else:
+            self.C_kridi_history_btn.setEnabled(True)
+
+
+        curs.execute('SELECT COUNT(ID) FROM S_kridi')
+        if curs.fetchone()[0] == 0:
+            self.S_kridi_history_btn.setEnabled(False)
+        else:
+            self.S_kridi_history_btn.setEnabled(True)
+
+
+        curs.execute('SELECT COUNT(ID) FROM clients')
+        if curs.fetchone()[0] == 0:
+            self.remove_client_Button.setEnabled(False)
+            self.edit_client_Button.setEnabled(False)
+            self.print_clients_table.setEnabled(False)
+            self.searsh_client_EditText.setEnabled(False)
+        else:
+            self.remove_client_Button.setEnabled(True)
+            self.edit_client_Button.setEnabled(True)
+            self.print_clients_table.setEnabled(True)
+            self.searsh_client_EditText.setEnabled(True)
+
+
+        curs.execute('SELECT COUNT(ID) FROM sellers')
+        if curs.fetchone()[0] == 0:
+            self.remove_seller_Button.setEnabled(False)
+            self.edit_seller_Button.setEnabled(False)
+            self.print_sellers_info.setEnabled(False)
+            self.searsh_seller_EditText.setEnabled(False)
+        else:
+            self.remove_seller_Button.setEnabled(True)
+            self.edit_seller_Button.setEnabled(True)
+            self.print_sellers_info.setEnabled(True)
+            self.searsh_seller_EditText.setEnabled(True)
+
+        curs.execute('SELECT COUNT(ID) FROM articles')
+        if curs.fetchone()[0] == 0:
+            # self.remove_art_Button.setEnabled(False)
+            self.edit_art_Button.setEnabled(False)
+            self.print_art.setEnabled(False)
+            self.searsh_art.setEnabled(False)
+        else:
+            # self.remove_art_Button.setEnabled(True)
+            self.edit_art_Button.setEnabled(True)
+            self.print_art.setEnabled(True)
+            self.searsh_art.setEnabled(True)
+
 
 
     def onTabChange(self): #TODO Fix this shit
@@ -1488,7 +1610,7 @@ class Home(QWidget, home_win_dir):# almost...
         
         self.money_u_have_to_pay.setText(str(total_debt_S))
         self.money_u_have_to_pay.setText(self.money_u_have_to_pay.text() + ' DH ')
-        print( 'set_total_sellers_dept_money', total_debt_S)
+        # print( 'set_total_sellers_dept_money', total_debt_S)
 
         curs.execute('SELECT COUNT(ID) FROM clients WHERE total_rest > 0;')
         self.clients_debteds_counter.setText(str(curs.fetchone()[0]))
@@ -1517,7 +1639,7 @@ class Home(QWidget, home_win_dir):# almost...
             for c_n, d in enumerate(r_d):
                 self.clients_pay_today_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
-        print('rus_- = ', rus_)
+        # print('rus_- = ', rus_)
 
 
         #articles will end table
@@ -1546,9 +1668,8 @@ class Home(QWidget, home_win_dir):# almost...
             for c_n, d in enumerate(r_d):
                 self.clients_table.setItem(r_n, c_n, QtWidgets.QTableWidgetItem(str(d)))
 
-        print(curs.fetchall())
-        #
-        #TODO : contuni with all tables
+        # print(curs.fetchall())
+
         #sellers table
         while self.sellers_table.rowCount() > 0 :
             self.sellers_table.removeRow(0)
@@ -1622,7 +1743,7 @@ class Home(QWidget, home_win_dir):# almost...
         curs.execute('SELECT name FROM articles WHERE qt > 0')
         for i in curs.fetchall():
             self.articles_list_.append(i[0])
-        print(self.articles_list_)
+        # print(self.articles_list_)
         self.sell_choose_article_comboBox.addItems(self.articles_list_)
 
         clients_names_list_ = []
@@ -1631,18 +1752,18 @@ class Home(QWidget, home_win_dir):# almost...
         for fn, ln in curs.fetchall():
 
             clients_names_list_.append(fn + ' ' + ln)
-        print('CLIENTS : ', clients_names_list_)
+        # print('CLIENTS : ', clients_names_list_)
         self.sell_choose_buyer_comboBox.addItems(clients_names_list_)
 
         selers_names_list_ = ['']
         curs.execute('SELECT F_name, L_name FROM sellers ')
         for sfn, sln in curs.fetchall():
             selers_names_list_.append(sfn + ' ' + sln)
-        print('SELLRES : ', selers_names_list_)
+        # print('SELLRES : ', selers_names_list_)
         self.buy_choose_seller_comboBox.addItems(selers_names_list_)
 
     def set_sell_article_type(self):
-        print(str(self.sell_choose_article_comboBox.currentText()))
+        # print(str(self.sell_choose_article_comboBox.currentText()))
         # r_count = curs.execute('SELECT COUNT(*) FROM articles')
         # print('articles table has {} rows '.format(str(r_count.fetchone())))
         if self.sell_choose_article_comboBox.currentText() == '' or self.sell_choose_article_comboBox.currentText() == ' ':
@@ -1771,7 +1892,7 @@ class Home(QWidget, home_win_dir):# almost...
 
 
             conn.commit()
-            print(self.sell_date_to_pay.date().toPyDate())
+            # print(self.sell_date_to_pay.date().toPyDate())
             self.sell_choose_article_comboBox.setCurrentIndex(0)
             self.sell_choose_buyer_comboBox.setCurrentIndex(0)
             self.sell_qt.setValue(0)
@@ -1796,7 +1917,7 @@ class Home(QWidget, home_win_dir):# almost...
                                    self.sell_qt.value(),self.sell_qt.value() * curs.fetchone()[0], str(self.sell_date_to_pay.date().toPyDate()) ))
 
             conn.commit()
-            print('DONE')
+            # print('DONE')
             self.sell_choose_article_comboBox.setCurrentIndex(0)
             self.sell_choose_buyer_comboBox.setCurrentIndex(0)
             self.sell_qt.setValue(0)
@@ -1804,7 +1925,7 @@ class Home(QWidget, home_win_dir):# almost...
 
     def save_buy_operation(self):
 
-        print(self.buy_art_stat)
+        # print(self.buy_art_stat)
         if self.buy_art_stat == '':
             self.err = QtWidgets.QErrorMessage()
             self.err.showMessage('المرجو إدخال إسم السلعة ')
@@ -2036,7 +2157,6 @@ class Home(QWidget, home_win_dir):# almost...
         self.selles_history_wn = Selles_history()
         self.selles_history_wn.show()
         self.close()
-        print('sell win opened')
 
     def open_buy_history(self):
         self.close()
@@ -2102,7 +2222,6 @@ class Reset_pass(QMainWindow, first_open_win_dir):
     def reset__(self):
         curs.execute('SELECT NAME FROM user;')
         curent_user_name = curs.fetchone()[0]
-        print('the user name is : ', curent_user_name)
 
         if self.user_name_entry.text() == '':
             self.err = QErrorMessage()
@@ -2164,11 +2283,10 @@ class VirificationAlert(QWidget, virification_alert_win_dir):
     def virife_password(self):
         curs.execute('SELECT PASSWORD FROM user')
         curent_pass = curs.fetchone()
-        print(curent_pass[0])
 
         if self.virif_pass_line.text() !='':
             if curent_pass[0] == self.virif_pass_line.text():
-                print('yes {} is same '.format(curent_pass[0]))
+                # print('yes {} is same '.format(curent_pass[0]))
                 self.home_wn = Home()
                 self.home_wn.show()
                 self.close()
@@ -2186,14 +2304,14 @@ class VirificationAlert(QWidget, virification_alert_win_dir):
             self.virif_pass_line.setFocus()
 
     def get_reset_password(self, event):
-        print('the reset password was clicked')
+        # print('the reset password was clicked')
         self.reset_pass_wn = Reset_pass()
         self.reset_pass_wn.show()
         self.close()
 
 
 
-    def get_help(self, event):
+    def get_help(self, event):# TODO help
         print('the help was clicked')
 
 class Setting_wn(QWidget, setting_win_dir):
