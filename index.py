@@ -10,7 +10,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 import os
 from os import path
 import sys
-from datetime import *
+import datetime
 import time
 import sqlite3
 import random
@@ -18,11 +18,20 @@ import multiprocessing as mp
 import os
 from stat import S_IREAD, S_IRGRP, S_IROTH
 from fpdf import FPDF
+import random, string
 
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
 
-today = date.today()
+import socket
+import uuid
+import cpuinfo
+import hashlib
 
-print("Today's date:", today)
+toDay = datetime.date.today()
+
+print("Today's date:", toDay)
 
 
 first_open_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "first_open_win.ui"))
@@ -39,6 +48,7 @@ fix_kridi_history_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "fix_
 kridi_history_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "kridi_history.ui"))
 edite_pea_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "edit_pea.ui"))
 edite_art_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "edit_art.ui"))
+activation_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "activation.ui"))
 #TODO : # help_win_dir,_ = loadUiType(path.join(path.dirname(__file__), "help.ui"))
 
 
@@ -48,6 +58,62 @@ curs.execute('CREATE TABLE IF NOT EXISTS user (NAME TEXT, PASSWORD TEXT)')
 
 header_ = 'this is a header'
 footer_ = 'this is a footer'
+
+
+class Activcl(QWidget, activation_win_dir):#DONE
+    def __init__(self, parent = None):
+        super(Activcl, self).__init__(parent)
+        QWidget.__init__(self)
+        self.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+        self.setWindowTitle('تفعيل')
+        self.activate.clicked.connect(self.activ)
+        curs.execute('SELECT client_id FROM user')
+        self.client_id.setText(curs.fetchone()[0])
+        curs.execute('SELECT safe FROM tools')
+        if curs.fetchone()[0] == 1 :
+            self.pass_entry.setEnabled(False)
+        else:
+            self.pass_entry.setEnabled(True)
+
+
+    def activ(self):
+        cred = credentials.Certificate('src/stock-management-4e0de-firebase-adminsdk-j6xb1-87516cfbeb.json')
+
+        # Initialize the app with a service account, granting admin privileges
+        firebase_admin.initialize_app(cred, {
+            'databaseURL': 'https://stock-management-4e0de.firebaseio.com/'
+        })
+        # As an admin, the app has access to read and write all data, regradless of Security Rules
+        ref = db.reference()
+        if ref.child('users') != None:
+            curs.execute('SELECT user_id, client_id FROM user')
+            userId, clientId = curs.fetchone()
+            for k, v in ref.child('users').get().items():
+                if k == clientId:
+                    curs.execute('SELECT key FROM deliy')
+                    key = curs.fetchone()[0]
+                    curs.execute('SELECT PASSWORD FROM user')
+                    pss = curs.fetchone()[0]
+
+                    if v['cpu'] == cpuinfo.get_cpu_info()['brand'] and v['userId'] == userId and hashlib.md5(self.activation_entry.text().encode()).hexdigest() == key and self.pass_entry.text() == pss :
+                        curs.execute('DROP TABLE deliy')
+                        ref.child('users').child(clientId).update({'activated_date': str(toDay)})
+                        conn.commit()
+                        activate_mssg = QMessageBox.information(self, '', 'تم التفعيل بنجاح', QMessageBox.Ok)
+                        if activate_mssg == QMessageBox.Ok:
+                            self.splash = Splash()
+                            self.splash.show()
+                            self.close()
+                    else:
+                        self.err = QMessageBox.information(self,'خطأ' , 'رمز التفعيل او الرمز السري غير صحيح', QMessageBox.Ok)
+                        if self.err == QMessageBox.Ok:
+                            self.close()
+                    break
+        else:
+            self.err = QtWidgets.QErrorMessage()
+            self.err.showMessage('هناك خطأ')
+            self.err.setWindowTitle('خطأ')
 
 class Splash(QWidget, splash_win_dir):#DONE
     def __init__(self, parent = None):
@@ -59,6 +125,17 @@ class Splash(QWidget, splash_win_dir):#DONE
         self.timer = QBasicTimer()
         self.step = 0
         self.prog()
+
+    def is_connected(self):
+        try:
+            # connect to the host -- tells us if the host is actually
+            # reachable
+            socket.create_connection(("172.217.204.99", 80))
+            return True
+        except OSError:
+            pass
+        return False
+
     def prog(self):
         if self.timer.isActive():
             self.timer.stop()
@@ -70,26 +147,56 @@ class Splash(QWidget, splash_win_dir):#DONE
             curs.execute('SELECT first FROM tools')
             first_stat = curs.fetchone()
             if first_stat[0] == 1:
-                print('its the first open ')
-                wilco_msg = QMessageBox.information(self, '', "بما أنها المرة الأولى هناك بعض المعلومات يجب تحديثها ", QMessageBox.Ok)
-                if wilco_msg == QMessageBox.Ok:
+                if self.is_connected():
+                    print('its the first open ')
                     self.first_open_w = FirstOpen()
                     self.first_open_w.show()
                     self.close()
+                else:
+                    err_msg = QMessageBox.information(self, '',
+                                                        "بما أنها المرة الأولى يجب توفر إاصال بالأنترنيت ",
+                                                        QMessageBox.Ok)
+                    if err_msg == QMessageBox.Ok:
+                        self.close()
 
             else:
-                curs.execute('SELECT safe FROM tools ')
-                curent_safe_stat = curs.fetchone()
-                if curent_safe_stat[0] == 0:
-                    print('its not the the first open ')
-                    self.virification_alert_wn = VirificationAlert()
-                    self.virification_alert_wn.show()
-                    self.close()
+
+                curs.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='deliy' ''')
+                if curs.fetchone()[0] == 1:
+                    print('the table is exists')
+                    curs.execute('SELECT start_date, end_date FROM deliy')
+                    date_ = curs.fetchone()
+                    if str(toDay) >= date_[1]:
+                        self.activate_wn = Activcl()
+                        self.activate_wn.show()
+                        self.close()
+                    elif str(toDay) >= date_[0] and str(toDay) < date_[1]:
+                        curs.execute('SELECT safe FROM tools ')
+                        curent_safe_stat = curs.fetchone()
+                        if curent_safe_stat[0] == 0:
+                            print('its not the the first open ')
+                            self.virification_alert_wn = VirificationAlert()
+                            self.virification_alert_wn.show()
+                            self.close()
+                        else:
+                            self.home_wn = Home()
+                            self.home_wn.show()
+                            self.close()
+                    else:
+                        err = QMessageBox.information(self,  '', 'المرجو ضبط إعدادات الوقت')
                 else:
-                    self.home_wn = Home()
-                    self.home_wn.show()
-                    self.close()
-           
+                    curs.execute('SELECT safe FROM tools ')
+                    curent_safe_stat = curs.fetchone()
+                    if curent_safe_stat[0] == 0:
+                        print('its not the the first open ')
+                        self.virification_alert_wn = VirificationAlert()
+                        self.virification_alert_wn.show()
+                        self.close()
+                    else:
+                        self.home_wn = Home()
+                        self.home_wn.show()
+                        self.close()
+
             return
         self.step += 4
         self.progressBar.setValue(self.step)
@@ -106,48 +213,95 @@ class FirstOpen(QMainWindow, first_open_win_dir):# done
         self.pass_confirmation.setEchoMode(QLineEdit.Password)
 
 
+        self.key = ''.join(random.choices(string.ascii_letters + string.digits, k=20))
+        self.userID = str(uuid.UUID(int=uuid.getnode()))
+        self.cpu_brand = cpuinfo.get_cpu_info()['brand']
+        self.start_date = str(toDay)
+        self.end_date = str(toDay + datetime.timedelta(days=7))
+
+        cred = credentials.Certificate('src/stock-management-4e0de-firebase-adminsdk-j6xb1-87516cfbeb.json')
+        # Initialize the app with a service account, granting admin privileges
+        firebase_admin.initialize_app(cred, {
+            'databaseURL': 'https://stock-management-4e0de.firebaseio.com/'
+        })
+        self.ref = db.reference()
+
+    def send_info_to_fire(self):
+        self.ref.child('users').update({
+            self.user_name_entry.text() + self.userID.split('-')[-1] : {
+                'userName ' : self.user_name_entry.text(),
+                'password' : self.pass_entry.text(),
+                'serialKey ': self.key,
+                'cpu' : self.cpu_brand,
+                'dateStarted' : self.start_date,
+                'dateEnded' : self.end_date,
+                'userId' : self.userID
+
+            }
+
+        })
+
+    def is_connected(self):
+        try:
+            # connect to the host -- tells us if the host is actually
+            # reachable
+            socket.create_connection(("172.217.204.99", 80))
+            return True
+        except OSError:
+            pass
+        return False
     def save_info_first_open(self):
+
         if self.user_name_entry.text() == '' or self.user_name_entry.text() == ' ' or self.user_name_entry.text() == 0 :
             self.err = QtWidgets.QErrorMessage()
             self.err.showMessage('لايمكن ترك إسم المستخدم فارغ ')
             self.err.setWindowTitle('خطأ')
             self.user_name_entry.setFocus()
-
-        elif self.safe_mod_checkBox.isChecked():
-            curs.execute('INSERT INTO user (NAME, PASSWORD) VALUES ( "{}", "{}" ); '.format(self.user_name_entry.text(), ''))
-            curs.execute('UPDATE tools SET user = "{}" , safe = 1  ;'.format(self.user_name_entry.text()))
-            curs.execute('UPDATE tools SET first = {}'.format(2))
-            conn.commit()
-            wilcome_msg = QMessageBox.information(self, '', "تم تحديث المعلومات بنجاح", QMessageBox.Ok)
-            if wilcome_msg == QMessageBox.Ok:
-                self.home_wn = Home()
-                self.home_wn.show()
-                self.close()
         else:
-            if self.pass_entry.text() == '' or self.pass_entry.text() == ' ':
-                self.err = QtWidgets.QErrorMessage()
-                self.err.showMessage('كلمة مرور غير صالحة ')
-                self.err.setWindowTitle('خطأ')
-                self.pass_entry.setFocus()
+            curs.execute('''CREATE TABLE IF NOT EXISTS deliy (key TEXT, start_date TEXT, end_date TEXT);''')
+            conn.commit()
+            if self.is_connected():
+                self.send_info_to_fire()
+                if self.safe_mod_checkBox.isChecked():
+                    curs.execute('INSERT INTO deliy (key, start_date, end_date ) VALUES("{}", "{}", "{}")'.format(hashlib.md5(self.key.encode()).hexdigest(), self.start_date, self.end_date))
+                    curs.execute('INSERT INTO user (NAME, PASSWORD, user_id, client_id) VALUES ( "{}", "{}", "{}", "{}"); '.format(self.user_name_entry.text(), '', self.userID, self.user_name_entry.text() + self.userID.split('-')[-1]))
+                    curs.execute('UPDATE tools SET user = "{}" , safe = 1  ;'.format(self.user_name_entry.text()))
+                    curs.execute('UPDATE tools SET first = {}'.format(2))
+                    conn.commit()
+                    wilcome_msg = QMessageBox.information(self, '', "تم تحديث المعلومات بنجاح", QMessageBox.Ok)
+                    if wilcome_msg == QMessageBox.Ok:
+                        self.home_wn = Home()
+                        self.home_wn.show()
+                        self.close()
+                else:
+                    if self.pass_entry.text() == '' or self.pass_entry.text() == ' ':
+                        self.err = QtWidgets.QErrorMessage()
+                        self.err.showMessage('كلمة مرور غير صالحة ')
+                        self.err.setWindowTitle('خطأ')
+                        self.pass_entry.setFocus()
 
-            elif self.pass_confirmation.text() == '' or self.pass_confirmation.text() == ' ' or self.pass_confirmation.text() != self.pass_entry.text():
-                self.err = QtWidgets.QErrorMessage()
-                self.err.showMessage('الكلمات غير متطابقة ')
-                self.err.setWindowTitle('خطأ')
-                self.pass_confirmation.setFocus()
+                    elif self.pass_confirmation.text() == '' or self.pass_confirmation.text() == ' ' or self.pass_confirmation.text() != self.pass_entry.text():
+                        self.err = QtWidgets.QErrorMessage()
+                        self.err.showMessage('الكلمات غير متطابقة ')
+                        self.err.setWindowTitle('خطأ')
+                        self.pass_confirmation.setFocus()
+                    else:
+                        curs.execute('INSERT INTO deliy (key, start_date, end_date ) VALUES("{}", "{}", "{}")'.format(str(hashlib.md5(self.key.encode()).hexdigest()), self.start_date, self.end_date))
+                        curs.execute('INSERT INTO user (NAME, PASSWORD, user_id, client_id) VALUES ( "{}", "{}" , "{}", "{}" ) '.format(self.user_name_entry.text(),self.pass_entry.text(), self.userID, self.user_name_entry.text() + self.userID.split('-')[-1]))
+                        curs.execute('UPDATE tools SET user = "{}", first = {} , safe = 0 '.format(self.user_name_entry.text(), 2))
+                        conn.commit()
+                        self.user_name_entry.setText('')
+                        self.pass_entry.setText('')
+                        self.pass_confirmation.setText('')
+                        wilcome_msg = QMessageBox.information(self, '', "تم تحديث المعلومات بنجاح", QMessageBox.Ok)
+                        if wilcome_msg == QMessageBox.Ok:
+                            self.home_wn = Home()
+                            self.home_wn.show()
+                            self.close()
             else:
-                curs.execute('INSERT INTO user (NAME, PASSWORD) VALUES ( "{}", "{}" ) '.format(self.user_name_entry.text(),self.pass_entry.text()))
-                curs.execute('UPDATE tools SET user = "{}", first = {} , safe = 0 '.format(self.user_name_entry.text(), 2))
-                conn.commit()
-                self.user_name_entry.setText('')
-                self.pass_entry.setText('')
-                self.pass_confirmation.setText('')
-                wilcome_msg = QMessageBox.information(self, '', "تم تحديث المعلومات بنجاح", QMessageBox.Ok)
-                if wilcome_msg == QMessageBox.Ok:
-                    self.home_wn = Home()
-                    self.home_wn.show()
-                    self.close()
-
+                err_msg = QMessageBox.information(self, '',
+                                                  "بما أنها المرة الأولى يجب توفر إاصال بالأنترنيت ",
+                                                  QMessageBox.Ok)
 
 class Print_pdf:
     def __init__(self, file_name, table_head, table = '', spacing = 1):
@@ -802,7 +956,7 @@ class C_kridi_fix(QWidget, fix_kridi_win_dir):# DONE
             curs.execute('UPDATE clients SET total_rest = total_debted - total_recived ')
             curs.execute('SELECT total_rest FROM C_kridi WHERE name LIKE "{}"'.format(self.fix_kridi_combo.currentText()))
             curs.execute('INSERT INTO fix_C_kridi_history (date, name, payed_money, rest) VALUES ("{}", "{}", {}, {})'
-                    .format(str(today), self.fix_kridi_combo.currentText(), self.fix_kridi_editeLine.text(), curs.fetchone()[0]))
+                    .format(str(toDay), self.fix_kridi_combo.currentText(), self.fix_kridi_editeLine.text(), curs.fetchone()[0]))
             conn.commit()
         except Exception as er:
             print(er)
@@ -926,7 +1080,7 @@ class S_kridi_fix(QWidget, fix_kridi_win_dir):
             curs.execute('UPDATE sellers SET total_rest = total_debted - total_recived ')
             curs.execute('SELECT total_rest FROM S_kridi WHERE name LIKE "{}"'.format(self.fix_kridi_combo.currentText()))
             curs.execute('INSERT INTO fix_S_kridi_history (date, name, payed_money, rest) VALUES ("{}", "{}", {}, {})'
-                    .format(str(today), self.fix_kridi_combo.currentText(), self.fix_kridi_editeLine.text(), curs.fetchone()[0]))
+                    .format(str(toDay), self.fix_kridi_combo.currentText(), self.fix_kridi_editeLine.text(), curs.fetchone()[0]))
             conn.commit()
         except Exception as er:
             print(er)      
@@ -1593,7 +1747,7 @@ class Home(QWidget, home_win_dir):# almost...
     def refresh_labels(self):
         curs.execute('SELECT NAME FROM user')
         self.wilcom_label.setText('مرحبا بالسيد ' + curs.fetchone()[0])
-        self.date_time_label.setText(str(today))
+        self.date_time_label.setText(str(toDay))
         curs.execute('SELECT hadit FROM hadit ;')
         self.hadit_list = []
         for i in curs.fetchall():
@@ -1614,8 +1768,8 @@ class Home(QWidget, home_win_dir):# almost...
 
         curs.execute('SELECT COUNT(ID) FROM clients WHERE total_rest > 0;')
         self.clients_debteds_counter.setText(str(curs.fetchone()[0]))
-        curs.execute('SELECT COUNT(ID) FROM clients WHERE pay_date LIKE "{}"'.format(str(today)))
-        # print(curs.fetchone()[0] == str(today))
+        curs.execute('SELECT COUNT(ID) FROM clients WHERE pay_date LIKE "{}"'.format(str(toDay)))
+        # print(curs.fetchone()[0] == str(toDay))
         clients_pay_today_list = curs.fetchone()[0]
         
         self.clients_must_pay_counter_today.setText(str(clients_pay_today_list))
@@ -1631,7 +1785,7 @@ class Home(QWidget, home_win_dir):# almost...
         while self.clients_pay_today_table.rowCount() > 0 :
             self.clients_pay_today_table.removeRow(0)
 
-        curs.execute('SELECT  name , total_rest FROM C_kridi  WHERE pay_date LIKE "{}"'.format(str(today)))
+        curs.execute('SELECT  name , total_rest FROM C_kridi  WHERE pay_date LIKE "{}"'.format(str(toDay)))
         rus_ = curs.fetchall()
         self.clients_pay_today_table.setRowCount(0)
         for r_n, r_d in enumerate(rus_):
@@ -1885,7 +2039,7 @@ class Home(QWidget, home_win_dir):# almost...
                                      '''.format(self.sell_choose_article_comboBox.currentText()))
             curs.execute('''
                                     INSERT INTO selles_history (date, client, article, qt, not_payed_yet, pay_date) VALUES("{}", "{}", "{}", {}, {}, "{}") ;
-                                    '''.format(today, self.sell_choose_buyer_comboBox.currentText(),
+                                    '''.format(toDay, self.sell_choose_buyer_comboBox.currentText(),
                                                self.sell_choose_article_comboBox.currentText(),
                                                self.sell_qt.value(), self.sell_qt.value() * curs.fetchone()[0],
                                                str(self.sell_date_to_pay.date().toPyDate())))
@@ -1913,7 +2067,7 @@ class Home(QWidget, home_win_dir):# almost...
 
             curs.execute('''
                         INSERT INTO selles_history (date, client, article, qt, payed, pay_date) VALUES("{}", "{}", "{}", {}, {}, "{}") 
-                        '''.format(today, self.sell_choose_buyer_comboBox.currentText(), self.sell_choose_article_comboBox.currentText(),
+                        '''.format(toDay, self.sell_choose_buyer_comboBox.currentText(), self.sell_choose_article_comboBox.currentText(),
                                    self.sell_qt.value(),self.sell_qt.value() * curs.fetchone()[0], str(self.sell_date_to_pay.date().toPyDate()) ))
 
             conn.commit()
@@ -2009,7 +2163,7 @@ class Home(QWidget, home_win_dir):# almost...
                         , self.buy_choose_seller_comboBox.currentText().split(' ')[0], self.buy_choose_seller_comboBox.currentText().split(' ')[1]))
 
                 curs.execute('INSERT INTO buys_history (date, seller, article, qt, not_payed_yet, pay_date) VALUES("{}", "{}", "{}", {}, {}, "{}") ;'
-                             .format(today, self.buy_choose_seller_comboBox.currentText(), self.buy_articl_name_lineEdit.text(), self.buy_article_qt.value()
+                             .format(toDay, self.buy_choose_seller_comboBox.currentText(), self.buy_articl_name_lineEdit.text(), self.buy_article_qt.value()
                                      , self.buy_article_price.value() * self.buy_article_qt.value(), str(self.buy_date_to_pay.date().toPyDate())))
 
 
@@ -2027,7 +2181,7 @@ class Home(QWidget, home_win_dir):# almost...
                 curs.execute(
                     'UPDATE sellers SET total_recived = total_recived + {}, pay_date = "{}"  WHERE F_name LIKE "{}" AND L_name LIKE "{}";'.format(
                         self.buy_article_price.value() * self.buy_article_qt.value(),
-                        today
+                        toDay
                         , self.buy_choose_seller_comboBox.currentText().split(' ')[0],
                         self.buy_choose_seller_comboBox.currentText().split(' ')[1]))
 
@@ -2035,10 +2189,10 @@ class Home(QWidget, home_win_dir):# almost...
                     '''INSERT INTO buys_history
                      (date, seller, article, qt, payed, pay_date) 
                      VALUES("{}", "{}", "{}", {}, {}, "{}") ;
-                     '''.format(today, self.buy_choose_seller_comboBox.currentText(), self.buy_articl_name_lineEdit.text(),
+                     '''.format(toDay, self.buy_choose_seller_comboBox.currentText(), self.buy_articl_name_lineEdit.text(),
                             self.buy_article_qt.value()
                             , self.buy_article_price.value() * self.buy_article_qt.value(),
-                            today))
+                            toDay))
 
 
             conn.commit()
@@ -2124,7 +2278,7 @@ class Home(QWidget, home_win_dir):# almost...
 
                 curs.execute(
                     'INSERT INTO buys_history (date, seller, article, qt, not_payed_yet, pay_date) VALUES("{}", "{}", "{}", {}, {}, "{}") ;'
-                    .format(today, self.buy_choose_seller_comboBox.currentText(), self.buy_choose_article_comboBox.currentText(),
+                    .format(toDay, self.buy_choose_seller_comboBox.currentText(), self.buy_choose_article_comboBox.currentText(),
                             self.buy_article_qt.value()
                             , self.buy_article_price.value() * self.buy_article_qt.value(),
                             str(self.buy_date_to_pay.date().toPyDate())))
@@ -2137,7 +2291,7 @@ class Home(QWidget, home_win_dir):# almost...
                 curs.execute(
                     'UPDATE sellers SET total_recived = total_recived + {}, pay_date = "{}"  WHERE F_name LIKE "{}" AND L_name LIKE "{}";'.format(
                         self.buy_article_price.value() * self.buy_article_qt.value(),
-                        today
+                        toDay
                         , self.buy_choose_seller_comboBox.currentText().split(' ')[0],
                         self.buy_choose_seller_comboBox.currentText().split(' ')[1]))
 
@@ -2145,11 +2299,11 @@ class Home(QWidget, home_win_dir):# almost...
                     '''INSERT INTO buys_history
                      (date, seller, article, qt, payed, pay_date) 
                      VALUES("{}", "{}", "{}", {}, {}, "{}") ;
-                     '''.format(today, self.buy_choose_seller_comboBox.currentText(),
+                     '''.format(toDay, self.buy_choose_seller_comboBox.currentText(),
                                 self.buy_choose_article_comboBox.currentText(),
                                 self.buy_article_qt.value()
                                 , self.buy_article_price.value() * self.buy_article_qt.value(),
-                                today))
+                                toDay))
 
             conn.commit()
 

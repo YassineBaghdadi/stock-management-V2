@@ -4,8 +4,19 @@
 # doc = Document()
 import sqlite3
 
+import firebase_admin
+import datetime
 conn = sqlite3.connect('src/db.db')
 curs = conn.cursor()
+# print(datetime.date.today() + datetime.timedelta(days=7))
+# curs.execute('insert into deliy(start_date, end_date)values ("{}", "{}")'.format(datetime.date.today(), str(datetime.date.today() + datetime.timedelta(days=7))))
+# conn.commit()
+# curs.execute(''' SELECT count(name) FROM sqlite_master WHERE type='table' AND name='user' ''')
+# if curs.fetchone()[0] == 1:
+#     print('the table is exists')
+#     if
+# else:
+#     print('the table is not exists')
 
 # # # ####################################################################
 # # # import random
@@ -272,31 +283,99 @@ from fpdf import FPDF
 #     pdf.ln(row_height*1)
 # pdf.output('/mnt/AC72F2C272F29076/works/stock/stock-management-V2/src/y.pdf')
 
+#
+# from fpdf import FPDF
+#
+# pdf = FPDF()
+# pdf.add_page()
+#
+# # Add a DejaVu Unicode font (uses UTF-8)
+# # Supports more than 200 languages. For a coverage status see:
+# # http://dejavu.svn.sourceforge.net/viewvc/dejavu/trunk/dejavu-fonts/langcover.txt
+# pdf.add_font('DejaVu', '', 'src/DejaVuSansCondensed.ttf', uni=True)
+# pdf.set_font('DejaVu', '', 14)
+#
+# text = u"""
+# English: Hello World
+# Greek: Γειά σου κόσμος
+# Polish: Witaj świecie
+# Portuguese: Olá mundo
+# Russian: Здравствуй, Мир
+# Vietnamese: Xin chào thế giới
+# Arabic: مرحبا العالم
+# Hebrew: שלום עולם
+# """
+#
+# for txt in text.split('\n'):
+#     pdf.write(8, txt)
+#     pdf.ln(8)
+#
+# pdf.output('src/rrrr.pdf')
+#
+# import json
+# import urllib.request
+#
+# # download raw json object
+# url = "https://api.gdax.com/products/BTC-EUR/ticker"
+# data = urllib.request.urlopen(url).read().decode()
+#
+# # parse json object
+# obj = json.loads(data)
 
-from fpdf import FPDF
+# output some object attributes
+# print('$ ' + obj['price'])
+# # print('$ ' + obj['volume'])
+# for i in obj:
+#     print(i)
+# Import the Firebase service
 
-pdf = FPDF()
-pdf.add_page()
+from firebase_admin import auth
 
-# Add a DejaVu Unicode font (uses UTF-8)
-# Supports more than 200 languages. For a coverage status see:
-# http://dejavu.svn.sourceforge.net/viewvc/dejavu/trunk/dejavu-fonts/langcover.txt
-pdf.add_font('DejaVu', '', 'src/DejaVuSansCondensed.ttf', uni=True)
-pdf.set_font('DejaVu', '', 14)
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
 
-text = u"""
-English: Hello World
-Greek: Γειά σου κόσμος
-Polish: Witaj świecie
-Portuguese: Olá mundo
-Russian: Здравствуй, Мир
-Vietnamese: Xin chào thế giới
-Arabic: مرحبا العالم
-Hebrew: שלום עולם
-"""
+# default_app = firebase_admin.initialize_app()
+# Fetch the service account key JSON file contents
+cred = credentials.Certificate('src/stock-management-4e0de-firebase-adminsdk-j6xb1-87516cfbeb.json')
 
-for txt in text.split('\n'):
-    pdf.write(8, txt)
-    pdf.ln(8)
+# Initialize the app with a service account, granting admin privileges
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://stock-management-4e0de.firebaseio.com/'
+})
 
-pdf.output('src/rrrr.pdf')
+# As an admin, the app has access to read and write all data, regradless of Security Rules
+ref = db.reference()
+#
+# ref.update({
+#     input('name : '): {
+#         'age': input('age : '),
+#         'city': input('city : ')
+#     }
+# # })
+# ref.child('users').child('test').update({'age': 21})
+# # print('###########')
+# if ref.child('users').get() != None:
+#     for key, val in ref.child('users').get().items():
+#         print(key, val)
+#         if key == 'yass083e8e293e87':
+#             print(val['user_name'])
+# else:
+#     print('NULL')
+#
+# import datetime
+# t = datetime.date.today()
+# d = t + datetime.timedelta(days=7)
+# print('today : ', t)
+# print('after 10 days : ', d)
+# print(type(t))
+# print(type(d))
+#
+# curs.execute('SELECT user_id, client_id FROM user')
+# # print(curs.fetchone())
+# userId, clientId = curs.fetchone()
+# print(userId)
+# print(clientId)
+
+curs.execute('''CREATE TABLE deliy (key TEXT, start_date TEXT, end_date TEXT);''')
+# conn.commit()
