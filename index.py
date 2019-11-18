@@ -1987,14 +1987,15 @@ class Home(QWidget, home_win_dir):# almost...
                 curs.execute('UPDATE C_kridi SET total_rest = debte - total_recived')
                 conn.commit()
             else:
-                cne = curs.execute('SELECT cne FROM clients WHERE F_name LIKE "{}" AND L_name LIKE "{}" '
+                curs.execute('SELECT cne FROM clients WHERE F_name LIKE "{}" AND L_name LIKE "{}" '
                                    .format(self.sell_choose_buyer_comboBox.currentText().split(' ')[0],
                                            self.sell_choose_buyer_comboBox.currentText().split(' ')[1]))
+                cne = curs.fetchone()[0]
 
                 curs.execute('''
                                                  INSERT INTO C_kridi(name, cne, debte, total_recived, pay_date) VALUES("{}", "{}", {}, 0, "{}")
                                                               '''.format(self.sell_choose_buyer_comboBox.currentText(),
-                                                                         cne.fetchone()[0], int(tt),
+                                                                         cne, int(tt),
                                                                          self.sell_date_to_pay.date().toPyDate()))
                 curs.execute('UPDATE C_kridi SET total_rest = debte - total_recived')
 

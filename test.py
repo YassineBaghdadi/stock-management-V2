@@ -337,15 +337,15 @@ from firebase_admin import db
 
 # default_app = firebase_admin.initialize_app()
 # Fetch the service account key JSON file contents
-cred = credentials.Certificate('src/stock-management-4e0de-firebase-adminsdk-j6xb1-87516cfbeb.json')
-
-# Initialize the app with a service account, granting admin privileges
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://stock-management-4e0de.firebaseio.com/'
-})
+# cred = credentials.Certificate('src/stock-management-4e0de-firebase-adminsdk-j6xb1-87516cfbeb.json')
+#
+# # Initialize the app with a service account, granting admin privileges
+# firebase_admin.initialize_app(cred, {
+#     'databaseURL': 'https://stock-management-4e0de.firebaseio.com/'
+# })
 
 # As an admin, the app has access to read and write all data, regradless of Security Rules
-ref = db.reference()
+# ref = db.reference()
 #
 # ref.update({
 #     input('name : '): {
@@ -377,5 +377,54 @@ ref = db.reference()
 # print(userId)
 # print(clientId)
 
-curs.execute('''CREATE TABLE deliy (key TEXT, start_date TEXT, end_date TEXT);''')
+# curs.execute('''CREATE TABLE deliy (key TEXT, start_date TEXT, end_date TEXT);''')
 # conn.commit()
+
+"""
+#TODO :###################### new way to create pdf ##################
+curs.execute('SELECT * FROM C_kridi_history')
+data = [('A', 'B', 'C', 'D', 'E', 'F', 'G')]
+for i in curs.fetchall() :
+    data.append(i)
+
+# for i in data :
+#     print(i)
+
+from reportlab.platypus import SimpleDocTemplate
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import TableStyle
+from reportlab.lib import colors
+
+
+pdf = SimpleDocTemplate(
+    'src/newWay.pdf',
+    pagesize=letter,
+
+)
+
+from reportlab.platypus import Table
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+table = Table(data)
+pdfmetrics.registerFont(TTFont('Arabic', 'src/Amiri.ttf'))
+table.setStyle(TableStyle([
+    ('BACKGROUND', (0, 0), (-1, 0), colors.green),
+    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+    ('FONTNAME', (0, 0), (-1, -1), 'Arabic'),
+    ('FONTSIZE', (0, 0), (-1, -1), 14),
+    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+    ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+    ('BOX', (0, 0), (-1, -1), 2, colors.black),
+    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+    ('BOTTOMPADDING', (0, 1), (-1, -1), 10),
+
+]))
+
+elem = []
+elem.append(table)
+pdf.build(elem)
+print('DONE')
+
+"""
+####################################################################################
